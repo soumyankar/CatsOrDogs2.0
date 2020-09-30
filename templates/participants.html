@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block container %}
+<h1>Participants</h1>
+<br>
+{% if animals|length < 1%}
+<p>No animals in database :(</p>
+<p>{{ animals }}</p>
+{% else %}
+{% for animal in animals %}
+<div class="row">
+	<div class="col-sm-4">
+		<img id="player-picture" src="{{ animal.weblink }}" style="max-width: 250px; max-height: 250px"></button>
+	</div>
+	<div class="col-sm-8">
+		<p id="player-name"><b>Name </b>- {{ animal.name }}</p>
+		<p id="player-breed"><b>Breed </b>- {{ animal.breed }}</p>
+	</div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}
