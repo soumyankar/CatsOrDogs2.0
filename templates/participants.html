@@ -1,25 +1,91 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<script type="text/javascript" src="{{ url_for('static',filename='js/ParticipantFormValidation.js') }}"></script>
 {% endblock %}
 
 {% block container %}
 <h1>Participants</h1>
+<p>Ability to add animals here!</p>
+<br><br>
+<form name="inputform" method="POST" action="/participants" onsubmit="return (validate());">
+	<label>Name </label>
+	<br>
+	<input type="text" name="name">
+	<br><br>
+	<label>Breed </label>
+	<br>
+	<input type="text" name="breed">
+	<br><br>
+	<label>TrueSkill Rating </label>
+	<br>
+	<input type="number" name="rating">
+	<br><br>
+	<label>Weblink </label>
+	<br>
+	<input type="text" name="weblink">
+	<br><br>
+	<label>Animal Type -- </label>
+	<select name="animaltype">
+		<option value="-1" selected disabled hidden></option>
+		<option value="Dogs">Dogs</option>
+		<option value="Cats">Cats</option>
+	</select>
+	<br><br>
+	<input type="submit" name="submit" value="Go!">
+</form>
+<br><br>
+<div class="line"></div>
+<h2>Dogs</h2>
 <br>
-{% if animals|length < 1%}
-<p>No animals in database :(</p>
-<p>{{ animals }}</p>
+{% if dogs|length < 1 %}
+<p>No dogs in database :(</p>
 {% else %}
-{% for animal in animals %}
+<br>
+{% for dog in dogs %}
 <div class="row">
 	<div class="col-sm-4">
-		<img id="player-picture" src="{{ animal.weblink }}" style="max-width: 250px; max-height: 250px"></button>
+		<a href="/participants/trueskill-dogs/{{ dog.id }}"><img id="player-picture" src="{{ dog.weblink }}" style="max-width: 250px; max-height: 250px"></a>
 	</div>
 	<div class="col-sm-8">
-		<p id="player-name"><b>Name </b>- {{ animal.name }}</p>
-		<p id="player-breed"><b>Breed </b>- {{ animal.breed }}</p>
+		<p id="dog-id"><b>ID </b>- {{ dog.id }}</p>
+		<p id="dog-name"><b>Name </b>- {{ dog.name }}</p>
+		<p id="dog-breed"><b>Breed </b>- {{ dog.breed }}</p>
+		<p id="dog-mean"><b>TrueSkill µ </b>- {{ dog.mean }}</p>
+		<p id="dog-deviation"><b>TrueSkill σ </b>- {{ dog.deviation }}</p>
+		<p id="dog-date-created"><b>Date Created </b>- {{ dog.date_created.date() }}</p>
+		<button value="Delete!"><a href="/participants/delete-dogs/{{ dog.id }}">Delete</a></button>
+		<button value="TrueSkill Info"><a href="/participants/trueskill-dogs/{{ dog.id }}">TrueSkill Info</a></button>	
 	</div>
 </div>
+<br>
+<br>
+{% endfor %}
+{% endif %}
+<div class="line"></div>
+<h2>Cats</h2>
+<br>
+{% if cats|length < 1 %}
+<p>No cats in database :(</p>
+{% else %}
+{% for cat in cats %}
+<div class="row">
+	<div class="col-sm-4">
+		<a href="/participants/trueskill-cats/{{ cat.id }}"><img id="player-picture" src="{{ cat.weblink }}" style="max-width: 250px; max-height: 250px"></a>
+	</div>
+	<div class="col-sm-8">
+		<p id="cat-id"><b>ID </b>- {{ cat.id }}</p>
+		<p id="cat-name"><b>Name </b>- {{ cat.name }}</p>
+		<p id="cat-breed"><b>Breed </b>- {{ cat.breed }}</p>
+		<p id="cat-mean"><b>TrueSkill µ </b>- {{ cat.mean }}</p>
+		<p id="cat-deviation"><b>TrueSkill σ </b>- {{ cat.deviation }}</p>
+		<p id="cat-date-created"><b>Date Created </b>- {{ cat.date_created.date() }}</p>
+		<button value="Delete!"><a href="/participants/delete-cats/{{ cat.id }}">Delete</a></button>
+		<button value="TrueSkill Info"><a href="/participants/trueskill-cats/{{ cat.id }}">TrueSkill Info</a></button>
+	</div>
+</div>
+<br>
+<br>
 {% endfor %}
 {% endif %}
 {% endblock %}

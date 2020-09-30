@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+{% endblock %}
+
+
+{% block container %}
+<h1>TrueSkill Info</h1>
+<br>
+<div class="row">
+	<div class="col-sm-4">
+		<img id="player-picture" src="{{ animal.weblink }}" style="max-width: 250px; max-height: 250px">
+	</div>
+	<div class="col-sm-8">
+		<p id="dog-id"><b>ID </b>- {{ animal.id }}</p>
+		<p id="dog-name"><b>Name </b>- {{ animal.name }}</p>
+		<p id="dog-breed"><b>Breed </b>- {{ animal.breed }}</p>
+		<p id="dog-mean"><b>TrueSkill µ </b>- {{ animal.mean }}</p>
+		<p id="dog-deviation"><b>TrueSkill σ </b>- {{ animal.deviation }}</p>
+		<p id="dog-date-created"><b>Date Created </b>- {{ animal.date_created.date() }}</p>
+	</div>
+</div>
+<br>
+<canvas id="myChart" width="400" height="400"></canvas>
+<script type="text/javascript" src="{{ url_for('static', filename='js/graph.js') }}"></script>
+{% endblock %}
