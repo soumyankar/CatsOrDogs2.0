@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for,request,redirect
+from flask import Flask,flash,render_template,url_for,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
@@ -63,6 +63,9 @@ class LoginForm(FlaskForm):
 
 @app.route('/admin',methods=['POST','GET'])
 def admin():
+	if current_user.is_authenticated:
+		return redirect(url_for('participants'))
+		flash('You are already logged in my dude')
 	form = LoginForm()
 	if form.validate_on_submit():
 		user = Admin.query.filter_by(username=form.username.data).first()
@@ -75,6 +78,12 @@ def admin():
 		else:
 			return '<h1>Username or password is invalid.</h1>'
 	return render_template('admin.html', form = form)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 @app.route('/', methods=['POST','GET'])
 def index():

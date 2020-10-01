@@ -3,7 +3,13 @@
 {% block head %}
 <script type="text/javascript" src="{{ url_for('static',filename='js/ParticipantFormValidation.js') }}"></script>
 {% endblock %}
-
+{% block logout %}
+<li>
+	<a href="/logout">
+          <span class="glyphicon glyphicon-log-out"></span> <span style="color: red;">Logout</span>
+    </a>
+</li>
+{% endblock %}
 {% block container %}
 <h1>Participants</h1>
 <p>Ability to add animals here!</p>
