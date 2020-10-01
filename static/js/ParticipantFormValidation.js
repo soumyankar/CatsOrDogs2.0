@@ -2,7 +2,7 @@ function validate() {
 
    if( document.inputform.name.value == "" ) {
       alert( "Please provide Animal's name!" );
-      document.myForm.name.focus() ;
+      document.inputform.name.focus() ;
       return false;
    }
    if( document.inputform.breed.value == "" ) {

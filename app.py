@@ -95,7 +95,7 @@ def participants():
 		if(animal_type=='Dogs'):
 			animal_mean=float(25)
 			animal_deviation=float(8.3)
-			new_dog=Dogs(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="NULL ")
+			new_dog=Dogs(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="")
 			try:
 				db.session.add(new_dog)
 				db.session.commit()
@@ -105,7 +105,7 @@ def participants():
 		if(animal_type=='Cats'):
 			animal_mean=float(request.form['rating'])
 			animal_deviation=float(animal_mean/3)
-			new_cat=Cats(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="NULL ")
+			new_cat=Cats(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="")
 			try:
 				db.session.add(new_cat)
 				db.session.commit()
@@ -118,6 +118,7 @@ def participants():
 	return render_template('participants.html',dogs=dogs, cats=cats)
 
 @app.route('/participants/delete-dogs/<int:id>')
+@login_required
 def delete_dogs(id):
 	dog_to_delete= Dogs.query.get_or_404(id)
 	try:
@@ -128,6 +129,7 @@ def delete_dogs(id):
 		return 'Couldnt delete lol'
 
 @app.route('/participants/delete-cats/<int:id>')
+@login_required
 def delete_cats(id):
 	cat_to_delete= Cats.query.get_or_404(id)
 	try:
@@ -138,11 +140,13 @@ def delete_cats(id):
 		return 'Couldnt delete lol'
 
 @app.route('/participants/trueskill-dogs/<int:id>')
+@login_required
 def trueskill_dog(id):
 	dog = Dogs.query.get_or_404(id)
 	return render_template('trueskill.html',animal = dog)
 
 @app.route('/participants/trueskill-cats/<int:id>')
+@login_required
 def trueskill_cat(id):
 	cat = Cats.query.get_or_404(id)
 	return render_template('trueskill.html',animal = cat)

@@ -8,7 +8,7 @@
 <h1>Participants</h1>
 <p>Ability to add animals here!</p>
 <br><br>
-<form name="inputform" method="POST" action="/participants" onsubmit="return (validate());">
+<form name="inputform" method="POST" action="/participants" onsubmit="return (validate())">
 	<label>Name </label>
 	<br>
 	<input type="text" name="name">
@@ -32,7 +32,7 @@
 		<option value="Cats">Cats</option>
 	</select>
 	<br><br>
-	<input type="submit" name="submit" value="Go!">
+	<input type="submit" name="submit" value="Go!" onclick="return (validate());">
 </form>
 <br><br>
 <div class="line"></div>
