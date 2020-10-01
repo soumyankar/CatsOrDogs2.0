@@ -35,6 +35,7 @@ class Dogs(db.Model):
 	deviation = db.Column(db.Float(),nullable=False)
 	mean_history = db.Column(db.String(20000), nullable=True)
 	deviation_history = db.Column(db.String(20000), nullable=True)
+	battle_history = db.Column(db.String(20000),nullable=True)
 	date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
@@ -49,6 +50,7 @@ class Cats(db.Model):
 	deviation = db.Column(db.Float(),nullable=False)
 	mean_history = db.Column(db.String(20000), nullable=True)
 	deviation_history = db.Column(db.String(20000), nullable=True)
+	battle_history = db.Column(db.String(20000),nullable=True)
 	date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
@@ -93,7 +95,7 @@ def participants():
 		if(animal_type=='Dogs'):
 			animal_mean=float(25)
 			animal_deviation=float(8.3)
-			new_dog=Dogs(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation)
+			new_dog=Dogs(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="NULL ")
 			try:
 				db.session.add(new_dog)
 				db.session.commit()
@@ -103,7 +105,7 @@ def participants():
 		if(animal_type=='Cats'):
 			animal_mean=float(request.form['rating'])
 			animal_deviation=float(animal_mean/3)
-			new_cat=Cats(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation)
+			new_cat=Cats(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="NULL ")
 			try:
 				db.session.add(new_cat)
 				db.session.commit()
