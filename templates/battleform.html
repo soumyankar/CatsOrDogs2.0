@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block head %}
+
+<script type="text/javascript">
+function heropick(id){
+    if(confirm('Confirm Pick?')){
+      document.getElementById(id).checked = true;
+      console.log('SelectedDog = '+id);
+      document.getElementById('step1').className += ' hidethis';
+
+    }
+}
+
+</script>
+<style media="screen" type="text/css">
+.hidethis {
+  display:none;
+}
+/* HIDE RADIO */
+[type=radio] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+/* IMAGE STYLES */
+[type=radio] + img {
+  cursor: pointer;
+}
+
+/* CHECKED STYLES */
+[type=radio]:checked + img{
+  outline: 1px solid #f00;
+}
+
+</style>
+{% endblock %}
+
+{% block container %}
+<h1>Cats vs. Dogs!</h1>
+<p>The task is pretty simple - Pick a dog and battle through a set of cats.</p>
+<p>Pick the model that looks cuter to you! And remember - no favouritism! Be true to our beautiful models :)</p>
+<div class="line">
+</div>
+<form name="inputform" method="POST" action="/battleform">
+
+  <div class="row" id="step1">
+  <h2>Choose your Hero!</h2>
+  {% if dogs|length < 1 %}
+  <p>No dogs in database :(</p>
+  {% else %}
+  <br>
+
+  <div class="row">
+  {% for dog in dogs %}
+	<div class="col-sm-4">
+      <label for="{{dog.id}}">
+          <input type="radio" name="selectedDog" id="{{dog.id}}" value="{{dog.id}}">
+		      <button type="button" onclick="heropick({{dog.id}});"><img id="player-picture" src="{{ dog.weblink }}" style="max-width: 250px; max-height: 250px"></button>
+      </label>
+		<p id="dog-name"><b>Name </b>- {{ dog.name }}</p>
+		<p id="dog-breed"><b>Breed </b>- {{ dog.breed }}</p>
+  </div>
+  {% endfor %}
+  </div>
+  </div>
+
+  <div class="row" id="step2">
+  <h2>Battles!</h2>
+    <div class="col-sm-6">
+      <a href="#"><img id="player-picture" src="#" style="max-width: 250px; max-height: 250px"></a>
+  		<p id="dog-name"><b>Name </b>- dog.name </p>
+  		<p id="dog-breed"><b>Breed </b>- dog.breed </p>
+    </div>
+    <div class="col-sm-6">
+      <a href="#"><img id="player-picture" src="#" style="max-width: 250px; max-height: 250px"></a>
+  		<p id="cat-name"><b>Name </b>- cat.name </p>
+  		<p id="cat-breed"><b>Breed </b>- cat.breed </p>
+    </div>
+  </div>
+
+  <div class="row" id="step3">
+  <h2>Thanks! :)</h2>
+  <p>Thanks for helping us out! Please put in your name and that's it!</p>
+  <label>Name</label>
+	<br>
+	<input type="text" name="name">
+  </div>
+  <br>
+
+  <input type="submit" name="submit" value="Go!">
+</form>
+{% endif %}
+{% endblock %}

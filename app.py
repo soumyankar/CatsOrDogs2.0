@@ -1,3 +1,7 @@
+# For printing to console.
+from __future__ import print_function
+import sys
+
 from flask import Flask,flash,render_template,url_for,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
@@ -6,11 +10,13 @@ from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from trueskill import Rating, quality_1vs1, rate_1vs1
 import os
 
 app = Flask(__name__) #Indexing root folder
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False;
 Bootstrap(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') #sqlite:///test.db' # 3 forward slashes means relative path; 4 forward slashes means exact path
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db' # os.environ.get('DATABASE_URL') #sqlite:///test.db' # 3 forward slashes means relative path; 4 forward slashes means exact path
 db = SQLAlchemy(app)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
@@ -26,6 +32,14 @@ class Admin(UserMixin, db.Model):
 @login_manager.user_loader
 def load_user(user_id):
 	return Admin.query.get((user_id))
+
+class LabRats(db.Model):
+	id=db.Column(db.Integer, primary_key=True)
+	name=db.Column(db.String(100),unique=False)
+	date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+	def __repr__(self):
+		return '<LabRat %r>' % self.id
 
 class Dogs(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -61,7 +75,6 @@ class LoginForm(FlaskForm):
 	username = StringField('username', validators=[InputRequired()])
 	password = PasswordField('password', validators=[InputRequired()])
 
-
 @app.route('/admin',methods=['POST','GET'])
 def admin():
 	if current_user.is_authenticated:
@@ -93,6 +106,32 @@ def index():
 	if __name__ == "main":
 		app.run(debug=True)
 
+# Battle Page
+@app.route('/battleform', methods=['POST','GET'])
+def battleform():
+	dogs = Dogs.query.all()
+	cats = Cats.query.all()
+	cats_mean = []
+	cats_deviation = []
+	for cat in cats:
+		cats_mean.append(cat.mean)
+		cats_deviation.append(cat.deviation)
+
+	if request.method == 'POST':
+		selectedDog=request.form['selectedDog']
+		print(selectedDog, file=sys.stderr)
+		labrat_name=request.form['name']
+		new_labrat=LabRats(name=labrat_name)
+		try:
+			db.session.add(new_labrat)
+			db.session.commit()
+			return redirect(url_for('battleform'))
+		except:
+			return 'There was some error uploading the labrat.'
+	# print('Hello world!', file=sys.stderr)
+	print(cats_mean, file=sys.stderr)
+	print(cats_deviation, file=sys.stderr)
+	return render_template('battleform.html', dogs=dogs)
 
 @app.route('/participants', methods=['GET','POST'])
 @login_required
