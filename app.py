@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys
 
-from flask import Flask,flash,render_template,url_for,request,redirect
+from flask import Flask,flash,render_template,url_for,request,redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
@@ -22,6 +22,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin'
+selectedDog = ""
+battleOrder = []
+battleWinner = []
+iterations = 0
 
 class Admin(UserMixin, db.Model):
 	id=db.Column(db.Integer, primary_key=True)
@@ -110,28 +114,54 @@ def index():
 @app.route('/battleform', methods=['POST','GET'])
 def battleform():
 	dogs = Dogs.query.all()
+	global selectedDog
+	if request.method == 'POST':
+		selectedDog=request.form['selectedDog']
+		return redirect(url_for('battle',selectedDog=selectedDog))
+	# print('Hello world!', file=sys.stderr)
+	return render_template('battleform.html', dogs=dogs)
+
+@app.route('/battle', methods=['POST','GET'])
+def battle():
+	if iterations > 9:
+		return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
+	print('selectedDog =',selectedDog, file=sys.stderr)
+	battle_dog = Dogs.query.get_or_404(selectedDog)
 	cats = Cats.query.all()
 	cats_mean = []
 	cats_deviation = []
 	for cat in cats:
 		cats_mean.append(cat.mean)
 		cats_deviation.append(cat.deviation)
+	# print(cats_mean, file=sys.stderr)
+	# print(cats_deviation, file=sys.stderr)
+	return render_template('battle.html', battle_dog=battle_dog)
 
-	if request.method == 'POST':
-		selectedDog=request.form['selectedDog']
-		print(selectedDog, file=sys.stderr)
-		labrat_name=request.form['name']
-		new_labrat=LabRats(name=labrat_name)
-		try:
-			db.session.add(new_labrat)
-			db.session.commit()
-			return redirect(url_for('battleform'))
-		except:
-			return 'There was some error uploading the labrat.'
-	# print('Hello world!', file=sys.stderr)
-	print(cats_mean, file=sys.stderr)
-	print(cats_deviation, file=sys.stderr)
-	return render_template('battleform.html', dogs=dogs)
+@app.route('/battlehandler',methods=['POST'])
+def battlehandler():
+	global battleOrder, battleWinner, iterations
+	if iterations > 9:
+			print('battleOrder = ',battleOrder, file=sys.stderr)
+			print('battleWinner = ',battleWinner, file=sys.stderr)
+			return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
+	iterations = iterations + 1
+	selectedModel = request.form['selectedModel']
+	animalType = request.form['animalType']
+	opponentCat = request.form['opponentCat']
+	print('iterations =',iterations, file=sys.stderr)
+	print('selectedModel = ',selectedModel, file=sys.stderr)
+	print('animalType =',animalType, file=sys.stderr)
+	print('opponentCat =',opponentCat, file=sys.stderr)
+	if animalType == "dog":
+		battleOrder.append(opponentCat)
+		battleWinner.append(1)
+	if animalType == "cat":
+		battleOrder.append(opponentCat)
+		battleWinner.append(0)
+	if selectedModel:
+		return jsonify({'selectedModel': selectedModel, 'animalType': animalType})
+	else:
+		return jsonify({'error': 'Missing data!'})
 
 @app.route('/participants', methods=['GET','POST'])
 @login_required

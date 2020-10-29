@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block head %}
+<script src="{{ url_for('static', filename='js/battle.js') }}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<style media="screen" type="text/css">
+.hidethis {
+  display:none;
+}
+/* HIDE RADIO */
+[type=radio] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+/* IMAGE STYLES */
+[type=radio] + img {
+  cursor: pointer;
+}
+
+/* CHECKED STYLES */
+[type=radio]:checked + img{
+  outline: 1px solid #f00;
+}
+
+</style>
+
+{% endblock %}
+
+{% block container %}
+<div class="row" id="instructions">
+<h1>Cats vs. Dogs!</h1>
+<p>The task is pretty simple - Pick a dog and battle through a set of cats.</p>
+<p>Pick the model that looks cuter to you! And remember - no favouritism! Be true to our beautiful models :)</p>
+<div class="line">
+</div>
+</div>
+
+
+<form method="POST" id="battleform">
+  <div class="row" id="step2">
+  <h2>Battles!</h2>
+    <div class="col-sm-6">
+      <label for="battle_dog">
+        <button type="button" name="selectedModel" id="dog" value="{{battle_dog.id}}">
+        <img id="player-picture" src="{{battle_dog.weblink}}" style="max-width: 250px; max-height: 250px">
+        </button>
+      </label>
+      <p id="dog-name"><b>Name </b>- {{ battle_dog.name }} </p>
+  		<p id="dog-breed"><b>Breed </b>- {{ battle_dog.breed }} </p>
+    </div>
+    <div class="col-sm-6">
+      <label for="battle_cat">
+        <button type="button" name="selectedModel2" id="cat" value="battle_cat.id">
+        <img id="player-picture" src="#" style="max-width: 250px; max-height: 250px">
+        </button>
+      </label>
+      <p id="cat-name"><b>Name </b>- cat.name </p>
+  		<p id="cat-breed"><b>Breed </b>- cat.breed </p>
+    </div>
+  </div>
+
+  <div id="successAlert" class="alert alert-success" role="alert" style="display:none;"></div>
+  <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+  <div class="row" id="step3" style="display:none;">
+  <p>Thanks for helping us out! Please put in your name and that's it!</p>
+  <label>Name</label>
+	<br>
+	<input type="text" name="name" id="name">
+  <button type="submit">Go!</button>
+  </div>
+  <br>
+</form>
+
+  <div class="row" id="thanks" style="display: none;">
+    <h2>Thanks! :)</h2>
+    <p>Commiting your data, thanks for your help! Check out how your hero is doing on the <i>Leaderboard(Need to add link)</i>.</p>
+  </div>
+{% endblock %}

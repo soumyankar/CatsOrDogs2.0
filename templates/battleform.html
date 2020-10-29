@@ -9,7 +9,7 @@ function heropick(id){
       document.getElementById(id).checked = true;
       console.log('SelectedDog = '+id);
       document.getElementById('step1').className += ' hidethis';
-
+      document.getElementById('submit-step1').click();
     }
 }
 
@@ -67,30 +67,7 @@ function heropick(id){
   </div>
   </div>
 
-  <div class="row" id="step2">
-  <h2>Battles!</h2>
-    <div class="col-sm-6">
-      <a href="#"><img id="player-picture" src="#" style="max-width: 250px; max-height: 250px"></a>
-  		<p id="dog-name"><b>Name </b>- dog.name </p>
-  		<p id="dog-breed"><b>Breed </b>- dog.breed </p>
-    </div>
-    <div class="col-sm-6">
-      <a href="#"><img id="player-picture" src="#" style="max-width: 250px; max-height: 250px"></a>
-  		<p id="cat-name"><b>Name </b>- cat.name </p>
-  		<p id="cat-breed"><b>Breed </b>- cat.breed </p>
-    </div>
-  </div>
-
-  <div class="row" id="step3">
-  <h2>Thanks! :)</h2>
-  <p>Thanks for helping us out! Please put in your name and that's it!</p>
-  <label>Name</label>
-	<br>
-	<input type="text" name="name">
-  </div>
-  <br>
-
-  <input type="submit" name="submit" value="Go!">
+  <input class="hidethis" type="submit" name="submit" id="submit-step1" value="Go!">
 </form>
 {% endif %}
 {% endblock %}
