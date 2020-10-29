@@ -22,10 +22,14 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin'
-selectedDog = ""
-battleOrder = []
-battleWinner = []
-iterations = 0
+selectedDog = "" # Global variable that holds the dog in battleDog
+selectedCat = "" # Global variable that holds the cat in battleCat
+battleOrder = [] # Global variable that holds order of battle
+battleWinner = [] # Global variable that holds order of battle winners
+catsMean = [] # Global variable to hold all means of cats
+catsDeviation = [] # Global variable tl hold add deviations of cats
+iterations = 0 # Global variable that keeps count of 10 iterations.
+battleDog = ""# Global variable that holds the dataclip of selectedDog
 
 class Admin(UserMixin, db.Model):
 	id=db.Column(db.Integer, primary_key=True)
@@ -113,29 +117,48 @@ def index():
 # Battle Page
 @app.route('/battleform', methods=['POST','GET'])
 def battleform():
+	global selectedDog,catsMean,catsDeviation,selectedCat
 	dogs = Dogs.query.all()
-	global selectedDog
+	cats = Cats.query.all()
+	for cat in cats:
+		catsMean.append(cat.mean)
+		catsDeviation.append(cat.deviation)
 	if request.method == 'POST':
 		selectedDog=request.form['selectedDog']
-		return redirect(url_for('battle',selectedDog=selectedDog))
-	# print('Hello world!', file=sys.stderr)
+		selectedCat=(matchup()).id
+		return redirect(url_for('battle',selectedDog=selectedDog,selectedCat=selectedCat))
 	return render_template('battleform.html', dogs=dogs)
 
 @app.route('/battle', methods=['POST','GET'])
 def battle():
 	if iterations > 9:
 		return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
-	print('selectedDog =',selectedDog, file=sys.stderr)
 	battle_dog = Dogs.query.get_or_404(selectedDog)
-	cats = Cats.query.all()
-	cats_mean = []
-	cats_deviation = []
-	for cat in cats:
-		cats_mean.append(cat.mean)
-		cats_deviation.append(cat.deviation)
-	# print(cats_mean, file=sys.stderr)
-	# print(cats_deviation, file=sys.stderr)
-	return render_template('battle.html', battle_dog=battle_dog)
+	battle_cat = Cats.query.get_or_404(selectedCat) # This is only for the 1st iteration
+	return render_template('battle.html', battle_dog=battle_dog, battle_cat=battle_cat)
+
+def matchup():
+	global battleDog
+	battleDog = Dogs.query.get_or_404(selectedDog)
+	battleDogMean = battleDog.mean
+	battleDogDeviation = battleDog.deviation
+	lowerLimit = battleDogMean - 2*battleDogDeviation
+	upperLimit = battleDogMean + 2*battleDogDeviation
+	bestRating = 99999
+	testSubjects = len(catsMean)
+	# Defining Ratings
+	battleDogTrueSkill = Rating(mu = battleDogMean, sigma = battleDogDeviation)
+	for i in range(testSubjects): # Going through all our cats because do not have many cats, but originally only loop from (mu-2*sigma) to (mu+2*sigma)
+		tempCat = Rating(mu = catsMean[i],sigma = catsDeviation[i])
+		tempQuality = quality_1vs1(battleDogTrueSkill,tempCat)
+		if abs(tempQuality - 50) < bestRating: # Finding closest matchup, i.e 50% draw prob.
+			bestRating = abs(tempQuality - 50)
+			battleCatTrueSkill = tempCat
+			bestMatch = (i+1) # id of best cat matchup
+	battleCat = Cats.query.get_or_404(bestMatch) # converted id to dataclip of best cat matchup
+	print('Best Cat for',battleDog.name,'=',battleCat,file=sys.stderr)
+	print('TrueSkill of Cat=',battleCatTrueSkill,file=sys.stderr)
+	return battleCat
 
 @app.route('/battlehandler',methods=['POST'])
 def battlehandler():
@@ -144,22 +167,23 @@ def battlehandler():
 			print('battleOrder = ',battleOrder, file=sys.stderr)
 			print('battleWinner = ',battleWinner, file=sys.stderr)
 			return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
-	iterations = iterations + 1
-	selectedModel = request.form['selectedModel']
-	animalType = request.form['animalType']
-	opponentCat = request.form['opponentCat']
-	print('iterations =',iterations, file=sys.stderr)
-	print('selectedModel = ',selectedModel, file=sys.stderr)
-	print('animalType =',animalType, file=sys.stderr)
-	print('opponentCat =',opponentCat, file=sys.stderr)
+	iterations = iterations + 1 # iterations to check 10 models or not
+	selectedModel = request.form['selectedModel'] # id of the winner
+	animalType = request.form['animalType'] # animal type chosen (dog/cat)
+	opponentCat = request.form['opponentCat'] # id of cat in battle
+	battleCat = matchup()
 	if animalType == "dog":
 		battleOrder.append(opponentCat)
 		battleWinner.append(1)
 	if animalType == "cat":
 		battleOrder.append(opponentCat)
 		battleWinner.append(0)
+	print('iterations =',iterations, file=sys.stderr)
+	print('selectedModel = ',selectedModel, file=sys.stderr)
+	print('animalType =',animalType, file=sys.stderr)
+	print('opponentCat =',opponentCat, file=sys.stderr)
 	if selectedModel:
-		return jsonify({'selectedModel': selectedModel, 'animalType': animalType})
+		return jsonify({'selectedModel': selectedModel, 'animalType': animalType, 'catID': battleCat.id, 'catName': battleCat.name, 'catBreed':battleCat.breed, 'dogName':battleDog.name})
 	else:
 		return jsonify({'error': 'Missing data!'})
 

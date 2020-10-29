@@ -48,17 +48,17 @@
         <img id="player-picture" src="{{battle_dog.weblink}}" style="max-width: 250px; max-height: 250px">
         </button>
       </label>
-      <p id="dog-name"><b>Name </b>- {{ battle_dog.name }} </p>
+      <p id="dog-name"><b>Name </b>- <span id="battledog-name" value={{battle_dog.name}}>{{ battle_dog.name }}</span></p>
   		<p id="dog-breed"><b>Breed </b>- {{ battle_dog.breed }} </p>
     </div>
     <div class="col-sm-6">
       <label for="battle_cat">
-        <button type="button" name="selectedModel2" id="cat" value="battle_cat.id">
-        <img id="player-picture" src="#" style="max-width: 250px; max-height: 250px">
+        <button type="button" name="selectedModel2" id="cat" value="{{ battle_cat.id }}">
+        <img id="player-picture" src="{{ battle_cat.weblink }}" style="max-width: 250px; max-height: 250px">
         </button>
       </label>
-      <p id="cat-name"><b>Name </b>- cat.name </p>
-  		<p id="cat-breed"><b>Breed </b>- cat.breed </p>
+      <p id="cat-name"><b>Name </b>- <span id="battlecat-name" value={{battle_cat.name}}>{{battle_cat.name}}</span></p>
+  		<p id="cat-breed"><b>Breed </b>- {{battle_cat.breed}} </p>
     </div>
   </div>
 

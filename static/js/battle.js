@@ -21,9 +21,13 @@ $(document).ready(function() {
 				$('#successAlert').hide();
 			}
 			else {
+        catID = data.catID;
+        catName = data.catName;
+        catBreed = data.catBreed;
         selectedModel = data.selectedModel;
         animalType = data.animalType;
-				$('#successAlert').text(selectedModel+" "+animalType).show();
+        dogName = data.dogName;
+				$('#successAlert').text("You liked "+dogName+" over "+catName).show();
 				$('#errorAlert').hide();
 			}
 		});
@@ -54,7 +58,11 @@ $(document).ready(function() {
 			else {
         selectedModel = data.selectedModel;
         animalType = data.animalType;
-				$('#successAlert').text(selectedModel+" "+animalType).show();
+        catID = data.catID;
+        catName = data.catName;
+        catBreed = data.catBreed;
+        dogName = data.dogName
+				$('#successAlert').text("You liked "+catName+" over "+dogName).show();
 				$('#errorAlert').hide();
 			}
 		});
