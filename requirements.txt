@@ -9,9 +9,11 @@ gunicorn==19.10.0
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
-psycopg2==2.8.3
+psycopg2-binary==2.8.6
 python-dotenv==0.14.0
+six==1.15.0
 SQLAlchemy==1.3.19
+trueskill==0.4.5
 typing==3.7.4.3
 visitor==0.1.3
 Werkzeug==1.0.1

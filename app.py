@@ -17,7 +17,7 @@ import os
 app = Flask(__name__) #Indexing root folder
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False;
 Bootstrap(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db' # os.environ.get('DATABASE_URL') #sqlite:///test.db' # 3 forward slashes means relative path; 4 forward slashes means exact path
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') # os.environ.get('DATABASE_URL') #sqlite:///test.db' # 3 forward slashes means relative path; 4 forward slashes means exact path
 db = SQLAlchemy(app)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
