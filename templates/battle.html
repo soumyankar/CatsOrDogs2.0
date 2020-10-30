@@ -30,6 +30,7 @@
 {% endblock %}
 
 {% block container %}
+
 <div class="row" id="instructions">
 <h1>Cats vs. Dogs!</h1>
 <p>The task is pretty simple - Pick a dog and battle through a set of cats.</p>
@@ -37,46 +38,66 @@
 <div class="line">
 </div>
 </div>
-
-
 <form method="POST" id="battleform">
-  <div class="row" id="step2">
+  <div class="row" id="step1">
+    <p>Thanks for helping us out! Please put in your name and let's go!</p>
+    <label>Name</label>
+    <br>
+    <input type="text" name="name" id="name">
+    <button type="submit">Go!</button>
+  </div>
+
+  <div class="row" id="step2" style="display:none;">
+  <h2>Choose your Hero!</h2>
+  {% if dogs|length < 1 %}
+  <p>No dogs in database :(</p>
+  {% else %}
+  <br>
+
+  <div class="row">
+  {% for dog in dogs %}
+	<div class="col-sm-4">
+      <label for="{{dog.id}}">
+          <input type="radio" name="selectedDog" id="{{dog.id}}" value="{{dog.id}}">
+		      <img id="player-picture" src="{{ dog.weblink }}" style="max-width: 250px; max-height: 250px">
+      </label>
+		<p><b>Name </b>- {{ dog.name }}</p>
+		<p><b>Breed </b>- {{ dog.breed }}</p>
+  </div>
+  {% endfor %}
+  </div>
+  </div>
+  {% endif %}
+  <div class="row" id="step3" style="display:none;">
   <h2>Battles!</h2>
     <div class="col-sm-6">
-      <label for="battle_dog">
-        <button type="button" name="selectedModel" id="dog" value="{{battle_dog.id}}">
-        <img id="player-picture" src="{{battle_dog.weblink}}" style="max-width: 250px; max-height: 250px">
+      <label for="dog">
+        <button type="button" name="selectedCatModel" id="dog" value="battle_dog.id">
+        <img id="dog-picture" src="https://picsum.photos/250" style="max-width: 250px; max-height: 250px">
         </button>
       </label>
-      <p id="dog-name"><b>Name </b>- <span id="battledog-name" value={{battle_dog.name}}>{{ battle_dog.name }}</span></p>
-  		<p id="dog-breed"><b>Breed </b>- {{ battle_dog.breed }} </p>
+      <p><b>Name </b>- <span id="dog-name">dog.name</span></p>
+  		<p><b>Breed </b>- <span id="dog-breed">dog.breed</span></p>
     </div>
     <div class="col-sm-6">
-      <label for="battle_cat">
-        <button type="button" name="selectedModel2" id="cat" value="{{ battle_cat.id }}">
-        <img id="player-picture" src="{{ battle_cat.weblink }}" style="max-width: 250px; max-height: 250px">
+      <label for="cat">
+        <button type="button" name="selectedCatModel" id="cat" value="battle_cat.id ">
+        <img id="cat-picture" src="https://picsum.photos/250" style="max-width: 250px; max-height: 250px">
         </button>
       </label>
-      <p id="cat-name"><b>Name </b>- <span id="battlecat-name" value={{battle_cat.name}}>{{battle_cat.name}}</span></p>
-  		<p id="cat-breed"><b>Breed </b>- {{battle_cat.breed}} </p>
+
+      <p><b>Name </b>- <span id="cat-name">cat.name</span></p>
+  		<p><b>Breed </b>- <span id="cat-breed">cat.breed<span></p>
     </div>
   </div>
 
   <div id="successAlert" class="alert alert-success" role="alert" style="display:none;"></div>
   <div id="errorAlert" class="alert alert-danger" role="alert" style="display:none;"></div>
-
-  <div class="row" id="step3" style="display:none;">
-  <p>Thanks for helping us out! Please put in your name and that's it!</p>
-  <label>Name</label>
-	<br>
-	<input type="text" name="name" id="name">
-  <button type="submit">Go!</button>
-  </div>
-  <br>
 </form>
 
   <div class="row" id="thanks" style="display: none;">
     <h2>Thanks! :)</h2>
     <p>Commiting your data, thanks for your help! Check out how your hero is doing on the <i>Leaderboard(Need to add link)</i>.</p>
+    <p><a href="/battle">Feeling like taking another shot?</a></p>
   </div>
 {% endblock %}

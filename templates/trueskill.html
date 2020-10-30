@@ -22,7 +22,7 @@
 	</div>
 </div>
 <br>
-<canvas id="Trueskill" width="400" height="400"></canvas>
+<canvas id="Trueskill"></canvas>
 <script type="text/javascript">// Some Chart Colors.
 
 window.chartColors = {
@@ -73,14 +73,12 @@ var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'A
 var config = {
     type: 'line',
     data: {
-        labels: ['0','1','2','3','4','5','6','7','8','9','10'],
+        labels: {{ labels }},
         datasets: [{
             label: '{{animal.name}} µ',
             backgroundColor: window.chartColors['deeppink'],
             borderColor: window.chartColors['deeppink'],
-            data: [
-            25,30,35,40
-            ],
+            data: {{MeanHistory}},
             fill: false,
         }, {
             label: '{{animal.name}} σ',
@@ -88,20 +86,15 @@ var config = {
             borderDash: [5,5],
             backgroundColor: window.chartColors['plum'],
             borderColor: window.chartColors['plum'],
-            data: [
-            50,
-            30,
-            25,
-            15,
-            60
-            ],
+            data: {{DeviationHistory}},
         }]
     },
     options: {
         legend: {
             display: true
         },
-        responsive: false,
+        responsive: true,
+				maintainAspectRatio: true,
         title: {
             display: true,
             text: 'TrueSkill Info Line Chart'
@@ -111,7 +104,7 @@ var config = {
             mode: 'index',
             intersect: false,
             callbacks: {
-                    label: function(tooltipItems, data) { 
+                    label: function(tooltipItems, data) {
                     	var symbol = 'µ';
                     	var label;
                     	if(i % 2 == 0)
@@ -170,22 +163,29 @@ var colorNames = Object.keys(window.chartColors);
     </tr>
   </thead>
   <tbody>
+		{% if LabRatID|length < 1 %}
+		<tr>
+			<th scope="row">No data to show currently. :(</th>
+		</tr>
+		{% else %}
+		{% for x in range(length) %}
     <tr>
-      <th scope="row">1</th>
-      <td>µ = {{ animal.mean }} ; σ = {{ animal.deviation }}</td>
-      <td>Enemy Name
-      	<br> µ = cat.mean ; σ =  cat.deviation 
+      <th scope="row">{{x+1}}</th>
+      <td>µ = {{  MeanHistory[x] }} ; σ = {{ DeviationHistory[x] }}</td>
+      <td>µ = {{ OpponentMean[x] }} ; σ =  {{ OpponentDeviation[x] }}
+      	<br>{{ OpponentName[x] }}
       </td>
-      <td>µ = animal.updated_mean; σ = animal.updated_deviation</td>
+      <td>
+				{% if Result[x] == "W" %}
+				<span class="text-success">(W) </span>
+				{% else %}
+				<span class="text-danger">(L) </span>
+				{% endif %}
+				µ = {{ MeanHistory[x+1] }}; σ = {{ DeviationHistory[x+1] }}
+			</td>
     </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>µ = {{ animal.mean }} ; σ = {{ animal.deviation }}</td>
-      <td>Enemy Name #2
-      	<br> µ = cat.mean ; σ =  cat.deviation 
-      </td>
-      <td>µ = animal.updated_mean ; σ = animal.updated_deviation</td>
-    </tr>
+		{% endfor %}
+		{% endif %}
 </tbody>
 </table>
 {% endblock %}

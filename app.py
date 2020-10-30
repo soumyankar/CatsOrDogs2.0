@@ -6,6 +6,7 @@ from flask import Flask,flash,render_template,url_for,request,redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
+from sqlalchemy import asc, desc
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 from datetime import datetime
@@ -29,8 +30,8 @@ battleWinner = [] # Global variable that holds order of battle winners
 catsMean = [] # Global variable to hold all means of cats
 catsDeviation = [] # Global variable tl hold add deviations of cats
 iterations = 0 # Global variable that keeps count of 10 iterations.
-battleDog = ""# Global variable that holds the dataclip of selectedDog
-
+labratID = -99 # Global variable that holds the ID of the next user to be added
+labratName = "My mentors dont help me sadkek" # Global variable that holds labrat's name
 class Admin(UserMixin, db.Model):
 	id=db.Column(db.Integer, primary_key=True)
 	username=db.Column(db.String(15),unique=True)
@@ -44,6 +45,9 @@ def load_user(user_id):
 class LabRats(db.Model):
 	id=db.Column(db.Integer, primary_key=True)
 	name=db.Column(db.String(100),unique=False)
+	hero=db.Column(db.Integer)
+	battle_order=db.Column(db.String(100),unique=False)
+	battle_winner=db.Column(db.String(100),unique=False)
 	date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 	def __repr__(self):
@@ -115,31 +119,15 @@ def index():
 		app.run(debug=True)
 
 # Battle Page
-@app.route('/battleform', methods=['POST','GET'])
-def battleform():
-	global selectedDog,catsMean,catsDeviation,selectedCat
-	dogs = Dogs.query.all()
-	cats = Cats.query.all()
-	for cat in cats:
-		catsMean.append(cat.mean)
-		catsDeviation.append(cat.deviation)
-	if request.method == 'POST':
-		selectedDog=request.form['selectedDog']
-		selectedCat=(matchup()).id
-		return redirect(url_for('battle',selectedDog=selectedDog,selectedCat=selectedCat))
-	return render_template('battleform.html', dogs=dogs)
-
 @app.route('/battle', methods=['POST','GET'])
 def battle():
-	if iterations > 9:
-		return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
-	battle_dog = Dogs.query.get_or_404(selectedDog)
-	battle_cat = Cats.query.get_or_404(selectedCat) # This is only for the 1st iteration
-	return render_template('battle.html', battle_dog=battle_dog, battle_cat=battle_cat)
+	dogs=Dogs.query.all()
+	return render_template('battle.html',dogs=dogs)
 
-def matchup():
-	global battleDog
-	battleDog = Dogs.query.get_or_404(selectedDog)
+def FindMatch(battleDog):
+	global battleOrder, iterations, selectedCat, selectedDog
+	iterations = iterations + 1
+	cats = Cats.query.all()
 	battleDogMean = battleDog.mean
 	battleDogDeviation = battleDog.deviation
 	lowerLimit = battleDogMean - 2*battleDogDeviation
@@ -148,45 +136,107 @@ def matchup():
 	testSubjects = len(catsMean)
 	# Defining Ratings
 	battleDogTrueSkill = Rating(mu = battleDogMean, sigma = battleDogDeviation)
-	for i in range(testSubjects): # Going through all our cats because do not have many cats, but originally only loop from (mu-2*sigma) to (mu+2*sigma)
-		tempCat = Rating(mu = catsMean[i],sigma = catsDeviation[i])
-		tempQuality = quality_1vs1(battleDogTrueSkill,tempCat)
-		if abs(tempQuality - 50) < bestRating: # Finding closest matchup, i.e 50% draw prob.
+	for cat in cats: # Going through all our cats because do not have many cats, but originally only loop from (mu-2*sigma) to (mu+2*sigma)
+		catMean = cat.mean
+		catDeviation = cat.deviation
+		tempCatTrueSkill = Rating(mu = catMean,sigma = catDeviation)
+		tempQuality = quality_1vs1(battleDogTrueSkill,tempCatTrueSkill)
+		if cat.id in battleOrder:
+			continue
+		if (abs(tempQuality - 50) < bestRating): # Finding closest matchup, i.e 50% draw prob. and checking if (i) has been selected already
 			bestRating = abs(tempQuality - 50)
-			battleCatTrueSkill = tempCat
-			bestMatch = (i+1) # id of best cat matchup
-	battleCat = Cats.query.get_or_404(bestMatch) # converted id to dataclip of best cat matchup
-	print('Best Cat for',battleDog.name,'=',battleCat,file=sys.stderr)
-	print('TrueSkill of Cat=',battleCatTrueSkill,file=sys.stderr)
-	return battleCat
+			bestCat = cat # Best Match yet (this is dataclip)
+	battleOrder.append(bestCat.id)
+	print('battleOrder =',battleOrder,file=sys.stderr)
+	print('Best Cat for',battleDog.name,'=',bestCat,file=sys.stderr)
+	print('tempCatTrueSkill',tempCatTrueSkill)
+	print('battleDogTrueSkill',battleDogTrueSkill)
+	selectedDog = battleDog
+	selectedCat = bestCat
+	return bestCat
 
-@app.route('/battlehandler',methods=['POST'])
-def battlehandler():
-	global battleOrder, battleWinner, iterations
-	if iterations > 9:
-			print('battleOrder = ',battleOrder, file=sys.stderr)
-			print('battleWinner = ',battleWinner, file=sys.stderr)
-			return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
-	iterations = iterations + 1 # iterations to check 10 models or not
-	selectedModel = request.form['selectedModel'] # id of the winner
-	animalType = request.form['animalType'] # animal type chosen (dog/cat)
-	opponentCat = request.form['opponentCat'] # id of cat in battle
-	battleCat = matchup()
-	if animalType == "dog":
-		battleOrder.append(opponentCat)
-		battleWinner.append(1)
-	if animalType == "cat":
-		battleOrder.append(opponentCat)
-		battleWinner.append(0)
-	print('iterations =',iterations, file=sys.stderr)
-	print('selectedModel = ',selectedModel, file=sys.stderr)
-	print('animalType =',animalType, file=sys.stderr)
-	print('opponentCat =',opponentCat, file=sys.stderr)
-	if selectedModel:
-		return jsonify({'selectedModel': selectedModel, 'animalType': animalType, 'catID': battleCat.id, 'catName': battleCat.name, 'catBreed':battleCat.breed, 'dogName':battleDog.name})
-	else:
-		return jsonify({'error': 'Missing data!'})
+@app.route('/battlesetup',methods=['POST'])
+def battlesetup():
+	global selectedDog,catsMean,catsDeviation,selectedCat,iterations,labratID, battleWinner, battleOrder
+	if request.form['animalType'] == "dog":
+		battleWinner.append(int(1))
+		DogTS = Rating(mu = selectedDog.mean, sigma = selectedDog.deviation)
+		CatTS = Rating(mu = selectedCat.mean, sigma = selectedCat.deviation)
+		new_DogTS, new_CatTS = rate_1vs1(DogTS,CatTS)
 
+		# Commiting all this data.
+		bDog = Dogs.query.filter_by(id=selectedDog.id).first()
+		# First we shall commit dogs.
+		bDog.mean = round(new_DogTS.mu,3)
+		bDog.deviation = round(new_DogTS.sigma,2)
+		bDog.mean_history = bDog.mean_history+str(round(selectedDog.mean,3))+" "
+		bDog.deviation_history = bDog.deviation_history+str(round(selectedDog.deviation,2))+" "
+		bDogHistory = str(labratID)+" "+str(selectedCat.id)+" "+str(round(selectedCat.mean,3))+" "+str(round(selectedCat.deviation,2))+" "+"W"+" "
+		bDog.battle_history = bDog.battle_history+""+bDogHistory
+		# Now we shall commit cats
+		bCat = Cats.query.filter_by(id=selectedCat.id).first()
+		bCat.mean = round(new_CatTS.mu,3)
+		bCat.deviation = round(new_CatTS.sigma,2)
+		bCat.mean_history = bCat.mean_history+str(selectedCat.mean)+" "
+		bCat.deviation_history = bCat.deviation_history+str(round(selectedCat.deviation,2))+" "
+		bCatHistory = str(labratID)+" "+str(selectedDog.id)+" "+str(round(selectedDog.mean,3))+" "+str(round(selectedDog.deviation,2))+" "+"L"+" "
+		bCat.battle_history = bCat.battle_history+""+bCatHistory
+	if request.form['animalType'] == "cat":
+		battleWinner.append(int(0))
+		DogTS = Rating(mu = selectedDog.mean, sigma = selectedDog.deviation)
+		CatTS = Rating(mu = selectedCat.mean, sigma = selectedCat.deviation)
+		new_DogTS, new_CatTS = rate_1vs1(CatTS,DogTS)
+		# Commiting all this data.
+		bDog = Dogs.query.filter_by(id=selectedDog.id).first()
+		# First we shall commit dogs.
+		bDog.mean = round(new_DogTS.mu,3)
+		bDog.deviation = round(new_DogTS.sigma,2)
+		bDog.mean_history = bDog.mean_history+str(round(selectedDog.mean,3))+" "
+		bDog.deviation_history = bDog.deviation_history+str(round(selectedDog.deviation,2))+" "
+		bDogHistory = str(labratID)+" "+str(selectedCat.id)+" "+str(round(selectedCat.mean,3))+" "+str(round(selectedCat.deviation,2))+" "+"L"+" "
+		bDog.battle_history = bDog.battle_history+""+bDogHistory
+		# Now we shall commit cats
+		bCat = Cats.query.filter_by(id=selectedCat.id).first()
+		bCat.mean = round(new_CatTS.mu,3)
+		bCat.deviation = round(new_CatTS.sigma,2)
+		bCat.mean_history = bCat.mean_history+""+str(round(selectedCat.mean,3))+" "
+		bCat.deviation_history = bCat.deviation_history+str(round(selectedCat.deviation,2))+" "
+		bCatHistory = str(labratID)+" "+str(selectedDog.id)+" "+str(selectedDog.mean)+" "+str(round(selectedDog.deviation,2))+" "+"W"+" "
+		bCat.battle_history = bCat.battle_history+""+bCatHistory
+	db.session.commit()
+	if iterations > 3:
+		print('battleOrder = ',battleOrder, file=sys.stderr)
+		print('battleWinner = ',battleWinner, file=sys.stderr)
+		hero = bDog.name
+		new_labrat=LabRats(name=labratName,hero=hero,battle_order=' '.join(map(str,battleOrder)),battle_winner=' '.join(map(str,battleWinner)))
+		db.session.add(new_labrat)
+		db.session.commit()
+		iterations = 0
+		labratID = -99
+		battleOrder = []
+		battleWinner = []
+		return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
+	battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
+	battleCat = FindMatch(battleDog)
+	return jsonify({
+	'catID': battleCat.id,
+	'catName': battleCat.name,
+	'catBreed': battleCat.breed,
+	'catWeblink': battleCat.weblink,
+	'dogID': battleDog.id,
+	'dogName': battleDog.name,
+	'dogBreed': battleDog.breed,
+	'dogWeblink': battleDog.weblink,
+	})
+
+@app.route('/commitlabrat', methods=['POST'])
+def commitlabrat():
+	global labratID,labratName
+	labratID = LabRats.query.count()
+	labratID = labratID + 1
+	if request.form['name']:
+		labratName = request.form['name']
+	return jsonify({'labrat': labratName})
 @app.route('/participants', methods=['GET','POST'])
 @login_required
 def participants():
@@ -198,7 +248,7 @@ def participants():
 		if(animal_type=='Dogs'):
 			animal_mean=float(25)
 			animal_deviation=float(8.3)
-			new_dog=Dogs(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="")
+			new_dog=Dogs(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history="",deviation_history="",battle_history="")
 			try:
 				db.session.add(new_dog)
 				db.session.commit()
@@ -207,8 +257,8 @@ def participants():
 				return 'There was some error uploading dogs.'
 		if(animal_type=='Cats'):
 			animal_mean=float(request.form['rating'])
-			animal_deviation=float(animal_mean/3)
-			new_cat=Cats(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history=animal_mean,deviation_history=animal_deviation,battle_history="")
+			animal_deviation=float(round((animal_mean/3),2))
+			new_cat=Cats(name=animal_name,breed=animal_breed,weblink=animal_weblink,mean=animal_mean,deviation=animal_deviation,mean_history="",deviation_history="",battle_history="")
 			try:
 				db.session.add(new_cat)
 				db.session.commit()
@@ -246,10 +296,63 @@ def delete_cats(id):
 @login_required
 def trueskill_dog(id):
 	dog = Dogs.query.get_or_404(id)
-	return render_template('trueskill.html',animal = dog)
+	LabRatID = []
+	OpponentName =[]
+	OpponentMean = []
+	OpponentDeviation = []
+	Result = []
+	MeanHistory = map(float,dog.mean_history.split())
+	DeviationHistory = map(float,dog.deviation_history.split())
+	i = 0
+	length = 0
+	Parse = dog.battle_history.split()
+	for x in Parse:
+		if i >= 5:
+			i = 0
+		if i==0:
+			LabRatID.append(x.encode('ascii','ignore'))
+		if i==1:
+			OpponentName.append((Cats.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore'))
+		if i==2:
+			OpponentMean.append(x.encode('ascii','ignore'))
+		if i==3:
+			OpponentDeviation.append(x.encode('ascii','ignore'))
+		if i==4:
+			Result.append(x.encode('ascii','ignore'))
+		i = i + 1
+	length = len(LabRatID)
+	labels = range(0,length)
+	return render_template('trueskill.html',labels=labels, animal = dog, MeanHistory = MeanHistory,DeviationHistory = DeviationHistory,LabRatID = LabRatID, OpponentName = OpponentName, OpponentMean = OpponentMean, OpponentDeviation = OpponentDeviation, Result = Result, length=length)
 
 @app.route('/participants/trueskill-cats/<int:id>')
 @login_required
 def trueskill_cat(id):
 	cat = Cats.query.get_or_404(id)
-	return render_template('trueskill.html',animal = cat)
+	LabRatID = []
+	OpponentName =[]
+	OpponentMean = []
+	OpponentDeviation = []
+	Result = []
+	labels = []
+	MeanHistory = map(float,cat.mean_history.split())
+	DeviationHistory = map(float,cat.deviation_history.split())
+	i = 0
+	length = 0
+	Parse = cat.battle_history.split()
+	for x in Parse:
+		if i >= 5:
+			i = 0
+		if i==0:
+			LabRatID.append(x.encode('ascii','ignore'))
+		if i==1:
+			OpponentName.append((Dogs.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore'))
+		if i==2:
+			OpponentMean.append(x.encode('ascii','ignore'))
+		if i==3:
+			OpponentDeviation.append(x.encode('ascii','ignore'))
+		if i==4:
+			Result.append(x.encode('ascii','ignore'))
+		i = i + 1
+	length = len(LabRatID)
+	labels = range(0,length)
+	return render_template('trueskill.html',animal = cat, labels = labels, MeanHistory = MeanHistory,DeviationHistory = DeviationHistory,LabRatID = LabRatID, OpponentName = OpponentName, OpponentMean = OpponentMean, OpponentDeviation = OpponentDeviation, Result = Result, length=length)

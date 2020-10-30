@@ -1,5 +1,52 @@
 $(document).ready(function() {
+  // This is for choosing a dog
+  $(function(){
+    $('input[type="radio"]').click(function(){
+        if ($(this).is(':checked'))
+        {
+            if(confirm('Confirm pick?')){
+              $.ajax({
+                data: {
+                  selectedModel: $(this).val(),
+                  animalType: 'null',
+                },
+                type: 'POST',
+                url : '/battlesetup'
+              }).done(function(data){
+                if(data.error){
+                  $('#errorAlert').text(data.error).show();
+          				$('#successAlert').hide();
+                }
+                else{
+                  catID = data.catID;
+                  catName = data.catName;
+                  catBreed = data.catBreed;
+                  catWeblink = data.catWeblink;
+                  dogID = data.dogID;
+                  dogName = data.dogName;
+                  dogBreed = data.dogBreed;
+                  dogWeblink = data.dogWeblink;
+          				$('#step2').fadeOut();
+                  $('#step3').fadeIn();
+                  $('#dog').val(dogID);
+                  $('#cat').val(catID);
+                  $('#dog-name').html(dogName).show();
+                  $('#dog-breed').html(dogBreed).show();
+                  $('#dog-picture').attr('src',dogWeblink).show();
+                  $('#cat-name').html(catName).show();
+                  $('#cat-breed').html(catBreed).show();
+                  $('#cat-picture').attr('src',catWeblink).show();
+                }
+              });
+          }
+        }
+      });
+    });
   $('#dog').click(function(){
+    // This is when the dog is chosen over the cat.
+    $('#successAlert').text("You liked "+$('#dog-name').html()+" over "+$('#cat-name').html()).show();
+    $('#errorAlert').hide();
+    $('#cat-picture').fadeOut();
     $.ajax({
 			data : {
 				selectedModel : $('#dog').val(),
@@ -7,13 +54,14 @@ $(document).ready(function() {
         opponentCat : $('#cat').val(),
 			},
 			type : 'POST',
-			url : '/battlehandler'
+			url : '/battlesetup'
 		}).done(function(data) {
       if(data.gameover){
         $('#errorAlert').text(data.endText).show();
 				$('#successAlert').hide();
-        $('#step2').fadeOut();
-        $('#step3').fadeIn();
+        $('#step3').fadeOut();
+        $('#instructions').fadeOut();
+        $('#thanks').fadeIn();
         return false;
       }
 			if (data.error) {
@@ -24,31 +72,40 @@ $(document).ready(function() {
         catID = data.catID;
         catName = data.catName;
         catBreed = data.catBreed;
-        selectedModel = data.selectedModel;
-        animalType = data.animalType;
+        catWeblink = data.catWeblink;
+        dogID = data.dogID;
         dogName = data.dogName;
-				$('#successAlert').text("You liked "+dogName+" over "+catName).show();
-				$('#errorAlert').hide();
+        dogBreed = data.dogBreed;
+        dogWeblink = data.dogWeblink;
+        $('#cat').val(catID);
+        $('#cat-name').html(catName).show();
+        $('#cat-breed').html(catBreed).show();
+        $('#cat-picture').attr('src',catWeblink).fadeIn();
 			}
 		});
     // $(this).fadeOut();
   });
 
   $('#cat').click(function(){
+    // This function is for when cat is selected
+    $('#successAlert').text("You liked "+$('#cat-name').html()+" over "+$('#dog-name').html()).show();
+    $('#errorAlert').hide();
+    $('#cat-picture').fadeOut();
     $.ajax({
 			data : {
-				selectedModel : $('#cat').val(),
+				selectedModel : $('#dog').val(),
         animalType : 'cat',
         opponentCat : $('#cat').val(),
 			},
 			type : 'POST',
-			url : '/battlehandler'
+			url : '/battlesetup'
 		}).done(function(data) {
       if(data.gameover){
         $('#errorAlert').text(data.endText).show();
-        $('#successAlert').hide();
-        $('#step2').fadeOut();
-        $('#step3').fadeIn();
+        $('#successAlert').fadeOut();
+        $('#step3').fadeOut();
+        $('#instructions').fadeOut();
+        $('#thanks').fadeIn();
         return false;
       }
 			if (data.error) {
@@ -56,14 +113,18 @@ $(document).ready(function() {
 				$('#successAlert').hide();
 			}
 			else {
-        selectedModel = data.selectedModel;
-        animalType = data.animalType;
         catID = data.catID;
         catName = data.catName;
         catBreed = data.catBreed;
-        dogName = data.dogName
-				$('#successAlert').text("You liked "+catName+" over "+dogName).show();
-				$('#errorAlert').hide();
+        catWeblink = data.catWeblink;
+        dogID = data.dogID;
+        dogName = data.dogName;
+        dogBreed = data.dogBreed;
+        dogWeblink = data.dogWeblink;
+        $('#cat').val(catID);
+        $('#cat-name').html(catName).show();
+        $('#cat-breed').html(catBreed).show();
+        $('#cat-picture').attr('src',catWeblink).fadeIn();
 			}
 		});
     // $(this).fadeOut();
@@ -75,14 +136,12 @@ $(document).ready(function() {
         name: $('#name').val(),
       },
       type: 'POST',
-      url: '/battle'}).done(function(data){
-        if(data.gameover){
-          $('#errorAlert').fadeOut();
-  				$('#successAlert').fadeOut();
-          $('#step3').fadeOut();
-          $('#battleform').fadeOut();
-          $('#instructions').fadeOut();
-          $('#thanks').fadeIn();
+      url: '/commitlabrat' // fix this1
+    }).done(function(data){
+        if(data.labrat){
+          console.log("Today's labrat = "+data.labrat);
+          $('#step1').fadeOut();
+          $('#step2').fadeIn();
           return false;
         }
       });
