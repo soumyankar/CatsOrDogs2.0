@@ -300,6 +300,7 @@ def trueskill_dog(id):
 	OpponentName =[]
 	OpponentMean = []
 	OpponentDeviation = []
+	labels = []
 	Result = []
 	MeanHistory = list(map(float,map(str,dog.mean_history.split())))
 	DeviationHistory = list(map(float,map(str,dog.deviation_history.split())))
@@ -312,16 +313,18 @@ def trueskill_dog(id):
 		if i==0:
 			LabRatID.append(x.encode('ascii','ignore'))
 		if i==1:
-			OpponentName.append((Cats.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore'))
+			OpponentName.append(str((Cats.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore')))
 		if i==2:
-			OpponentMean.append(x.encode('ascii','ignore'))
+			OpponentMean.append(str(x.encode('ascii','ignore')))
 		if i==3:
-			OpponentDeviation.append(x.encode('ascii','ignore'))
+			OpponentDeviation.append(str(x.encode('ascii','ignore')))
 		if i==4:
-			Result.append(x.encode('ascii','ignore'))
+			Result.append(str(x.encode('ascii','ignore')))
 		i = i + 1
 	length = len(LabRatID)
-	labels = range(0,length)
+	for i in range(0,length):
+		labels.append(i)
+	print(labels)
 	return render_template('trueskill.html',labels=labels, animal = dog, MeanHistory = MeanHistory,DeviationHistory = DeviationHistory,LabRatID = LabRatID, OpponentName = OpponentName, OpponentMean = OpponentMean, OpponentDeviation = OpponentDeviation, Result = Result, length=length)
 
 @app.route('/participants/trueskill-cats/<int:id>')
@@ -345,14 +348,16 @@ def trueskill_cat(id):
 		if i==0:
 			LabRatID.append(x.encode('ascii','ignore'))
 		if i==1:
-			OpponentName.append((Dogs.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore'))
+			OpponentName.append(str((Dogs.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore')))
 		if i==2:
-			OpponentMean.append(x.encode('ascii','ignore'))
+			OpponentMean.append(str(x.encode('ascii','ignore')))
 		if i==3:
-			OpponentDeviation.append(x.encode('ascii','ignore'))
+			OpponentDeviation.append(str(x.encode('ascii','ignore')))
 		if i==4:
-			Result.append(x.encode('ascii','ignore'))
+			Result.append(str(x.encode('ascii','ignore')))
 		i = i + 1
 	length = len(LabRatID)
-	labels = range(0,length)
+	for i in range(0,length):
+		labels.append(i)
+	print(labels)
 	return render_template('trueskill.html',animal = cat, labels = labels, MeanHistory = MeanHistory,DeviationHistory = DeviationHistory,LabRatID = LabRatID, OpponentName = OpponentName, OpponentMean = OpponentMean, OpponentDeviation = OpponentDeviation, Result = Result, length=length)
