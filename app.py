@@ -207,7 +207,7 @@ def battlesetup():
 	if iterations > 3:
 		print('battleOrder = ',battleOrder, file=sys.stderr)
 		print('battleWinner = ',battleWinner, file=sys.stderr)
-		hero = bDog.name
+		hero = bDog.id
 		new_labrat=LabRats(name=labratName,hero=hero,battle_order=' '.join(map(str,battleOrder)),battle_winner=' '.join(map(str,battleWinner)))
 		db.session.add(new_labrat)
 		db.session.commit()

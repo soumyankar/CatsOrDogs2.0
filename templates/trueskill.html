@@ -75,18 +75,18 @@ var config = {
     data: {
         labels: {{ labels }},
         datasets: [{
-            label: '{{animal.name}} µ',
+            label: '{{ animal.name }} µ',
             backgroundColor: window.chartColors['deeppink'],
             borderColor: window.chartColors['deeppink'],
-            data: {{MeanHistory}},
+            data: {{ MeanHistory }},
             fill: false,
         }, {
-            label: '{{animal.name}} σ',
+            label: '{{ animal.name }} σ',
             fill: false,
             borderDash: [5,5],
             backgroundColor: window.chartColors['plum'],
             borderColor: window.chartColors['plum'],
-            data: {{DeviationHistory}},
+            data: {{ DeviationHistory }},
         }]
     },
     options: {
