@@ -301,8 +301,8 @@ def trueskill_dog(id):
 	OpponentMean = []
 	OpponentDeviation = []
 	Result = []
-	MeanHistory = map(float,dog.mean_history.split())
-	DeviationHistory = map(float,dog.deviation_history.split())
+	MeanHistory = map(float,map(str,cat.mean_history.split()))
+	DeviationHistory = map(float,map(str,cat.deviation_history.split()))
 	i = 0
 	length = 0
 	Parse = dog.battle_history.split()
@@ -334,8 +334,8 @@ def trueskill_cat(id):
 	OpponentDeviation = []
 	Result = []
 	labels = []
-	MeanHistory = map(float,cat.mean_history.split())
-	DeviationHistory = map(float,cat.deviation_history.split())
+	MeanHistory = map(float,map(str,cat.mean_history.split()))
+	DeviationHistory = map(float,map(str,cat.deviation_history.split()))
 	i = 0
 	length = 0
 	Parse = cat.battle_history.split()
