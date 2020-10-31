@@ -159,13 +159,15 @@ def FindMatch(battleDog):
 def battlesetup():
 	global selectedDog,catsMean,catsDeviation,selectedCat,iterations,labratID, battleWinner, battleOrder
 	if request.form['animalType'] == "dog":
+		tDog = Dogs.query.get_or_404(request.form['selectedModel'])
+		tCat = Cats.query.get_or_404(request.form['opponentCat'])
 		battleWinner.append(int(1))
-		DogTS = Rating(mu = (Dogs.query.get_or_404(request.form['selectedModel'])).mean, sigma = (Dogs.query.get_or_404(request.form['selectedModel'])).deviation)
-		CatTS = Rating(mu = (Cats.query.get_or_404(request.form['opponentCat'])).mean, sigma = (Cats.query.get_or_404(request.form['opponentCat'])).deviation)
+		DogTS = Rating(mu = tDog.mean, sigma = tDog.deviation)
+		CatTS = Rating(mu = tCat.mean, sigma = tCat.deviation)
 		new_DogTS, new_CatTS = rate_1vs1(DogTS,CatTS)
 
 		# Commiting all this data.
-		bDog = Dogs.query.filter_by(id=selectedDog.id).first()
+		bDog = Dogs.query.filter_by(id=tDog.id).first()
 		# First we shall commit dogs.
 		bDog.mean = round(new_DogTS.mu,3)
 		bDog.deviation = round(new_DogTS.sigma,2)
@@ -174,7 +176,7 @@ def battlesetup():
 		bDogHistory = str(labratID)+" "+str(selectedCat.id)+" "+str(round(selectedCat.mean,3))+" "+str(round(selectedCat.deviation,2))+" "+"W"+" "
 		bDog.battle_history = bDog.battle_history+""+bDogHistory
 		# Now we shall commit cats
-		bCat = Cats.query.filter_by(id=selectedCat.id).first()
+		bCat = Cats.query.filter_by(id=tCat.id).first()
 		bCat.mean = round(new_CatTS.mu,3)
 		bCat.deviation = round(new_CatTS.sigma,2)
 		bCat.mean_history = bCat.mean_history+str(selectedCat.mean)+" "
@@ -182,12 +184,14 @@ def battlesetup():
 		bCatHistory = str(labratID)+" "+str(selectedDog.id)+" "+str(round(selectedDog.mean,3))+" "+str(round(selectedDog.deviation,2))+" "+"L"+" "
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
 	if request.form['animalType'] == "cat":
+		tDog = Dogs.query.get_or_404(request.form['selectedModel'])
+		tCat = Cats.query.get_or_404(request.form['opponentCat'])
 		battleWinner.append(int(0))
-		DogTS = Rating(mu = (Dogs.query.get_or_404(request.form['selectedModel'])).mean, sigma = (Dogs.query.get_or_404(request.form['selectedModel'])).deviation)
-		CatTS = Rating(mu = (Cats.query.get_or_404(request.form['opponentCat'])).mean, sigma = (Cats.query.get_or_404(request.form['opponentCat'])).deviation)
+		DogTS = Rating(mu = tDog.mean, sigma = tDog.deviation)
+		CatTS = Rating(mu = tCat.mean, sigma = tCat.deviation)
 		new_DogTS, new_CatTS = rate_1vs1(CatTS,DogTS)
 		# Commiting all this data.
-		bDog = Dogs.query.filter_by(id=selectedDog.id).first()
+		bDog = Dogs.query.filter_by(id=tDog.id).first()
 		# First we shall commit dogs.
 		bDog.mean = round(new_DogTS.mu,3)
 		bDog.deviation = round(new_DogTS.sigma,2)
@@ -196,7 +200,7 @@ def battlesetup():
 		bDogHistory = str(labratID)+" "+str(selectedCat.id)+" "+str(round(selectedCat.mean,3))+" "+str(round(selectedCat.deviation,2))+" "+"L"+" "
 		bDog.battle_history = bDog.battle_history+""+bDogHistory
 		# Now we shall commit cats
-		bCat = Cats.query.filter_by(id=selectedCat.id).first()
+		bCat = Cats.query.filter_by(id=tCat.id).first()
 		bCat.mean = round(new_CatTS.mu,3)
 		bCat.deviation = round(new_CatTS.sigma,2)
 		bCat.mean_history = bCat.mean_history+""+str(round(selectedCat.mean,3))+" "
