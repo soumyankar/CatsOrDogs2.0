@@ -160,8 +160,8 @@ def battlesetup():
 	global selectedDog,catsMean,catsDeviation,selectedCat,iterations,labratID, battleWinner, battleOrder
 	if request.form['animalType'] == "dog":
 		battleWinner.append(int(1))
-		DogTS = Rating(mu = selectedDog.mean, sigma = selectedDog.deviation)
-		CatTS = Rating(mu = selectedCat.mean, sigma = selectedCat.deviation)
+		DogTS = Rating(mu = (Dogs.query.get_or_404(request.form['selectedModel'])).mean, sigma = (Dogs.query.get_or_404(request.form['selectedModel'])).deviation)
+		CatTS = Rating(mu = (Cats.query.get_or_404(request.form['opponentCat'])).mean, sigma = (Cats.query.get_or_404(request.form['opponentCat'])).deviation)
 		new_DogTS, new_CatTS = rate_1vs1(DogTS,CatTS)
 
 		# Commiting all this data.
@@ -183,8 +183,8 @@ def battlesetup():
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
 	if request.form['animalType'] == "cat":
 		battleWinner.append(int(0))
-		DogTS = Rating(mu = selectedDog.mean, sigma = selectedDog.deviation)
-		CatTS = Rating(mu = selectedCat.mean, sigma = selectedCat.deviation)
+		DogTS = Rating(mu = (Dogs.query.get_or_404(request.form['selectedModel'])).mean, sigma = (Dogs.query.get_or_404(request.form['selectedModel'])).deviation)
+		CatTS = Rating(mu = (Cats.query.get_or_404(request.form['opponentCat'])).mean, sigma = (Cats.query.get_or_404(request.form['opponentCat'])).deviation)
 		new_DogTS, new_CatTS = rate_1vs1(CatTS,DogTS)
 		# Commiting all this data.
 		bDog = Dogs.query.filter_by(id=selectedDog.id).first()
