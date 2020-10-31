@@ -316,11 +316,11 @@ def trueskill_dog(id):
 		if i==1:
 			OpponentName.append(str((Cats.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore')))
 		if i==2:
-			OpponentMean.append(float(str(x.encode('ascii','ignore'))))
+			OpponentMean.append(float(str(x.encode('ascii','ignore').decode('UTF-8'))))
 		if i==3:
-			OpponentDeviation.append(float(str(x.encode('ascii','ignore'))))
+			OpponentDeviation.append(float(str(x.encode('ascii','ignore').decode('UTF-8'))))
 		if i==4:
-			Result.append(str(x.encode('ascii','ignore')))
+			Result.append(str(x.encode('ascii','ignore').decode('UTF-8')))
 		i = i + 1
 	length = len(LabRatID)
 	OpponentMean = list(OpponentMean)
@@ -352,11 +352,11 @@ def trueskill_cat(id):
 		if i==1:
 			OpponentName.append(str((Dogs.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore')))
 		if i==2:
-			OpponentMean.append(float(x.decode('UTF-8')))
+			OpponentMean.append(float(str(x.encode('ascii','ignore').decode('UTF-8'))))
 		if i==3:
-			OpponentDeviation.append(float(x.decode('UTF-8')))
+			OpponentDeviation.append(float(str(x.encode('ascii','ignore').decode('UTF-8'))))
 		if i==4:
-			Result.append(str(x.encode('ascii','ignore')))
+			Result.append(str(x.encode('ascii','ignore').decode('UTF-8')))
 		i = i + 1
 	length = len(LabRatID)
 	OpponentMean = list(OpponentMean)
