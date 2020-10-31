@@ -171,17 +171,17 @@ def battlesetup():
 		# First we shall commit dogs.
 		bDog.mean = round(new_DogTS.mu,3)
 		bDog.deviation = round(new_DogTS.sigma,2)
-		bDog.mean_history = bDog.mean_history+str(round(selectedDog.mean,3))+" "
-		bDog.deviation_history = bDog.deviation_history+str(round(selectedDog.deviation,2))+" "
-		bDogHistory = str(labratID)+" "+str(selectedCat.id)+" "+str(round(selectedCat.mean,3))+" "+str(round(selectedCat.deviation,2))+" "+"W"+" "
+		bDog.mean_history = bDog.mean_history+str(round(tDog.mean,3))+" "
+		bDog.deviation_history = bDog.deviation_history+str(round(tDog.deviation,2))+" "
+		bDogHistory = str(labratID)+" "+str(tCat.id)+" "+str(round(tCat.mean,3))+" "+str(round(tCat.deviation,2))+" "+"W"+" "
 		bDog.battle_history = bDog.battle_history+""+bDogHistory
 		# Now we shall commit cats
 		bCat = Cats.query.filter_by(id=tCat.id).first()
 		bCat.mean = round(new_CatTS.mu,3)
 		bCat.deviation = round(new_CatTS.sigma,2)
-		bCat.mean_history = bCat.mean_history+str(selectedCat.mean)+" "
-		bCat.deviation_history = bCat.deviation_history+str(round(selectedCat.deviation,2))+" "
-		bCatHistory = str(labratID)+" "+str(selectedDog.id)+" "+str(round(selectedDog.mean,3))+" "+str(round(selectedDog.deviation,2))+" "+"L"+" "
+		bCat.mean_history = bCat.mean_history+str(tCat.mean)+" "
+		bCat.deviation_history = bCat.deviation_history+str(round(tCat.deviation,2))+" "
+		bCatHistory = str(labratID)+" "+str(tDog.id)+" "+str(round(tDog.mean,3))+" "+str(round(tDog.deviation,2))+" "+"L"+" "
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
 	if request.form['animalType'] == "cat":
 		tDog = Dogs.query.get_or_404(request.form['selectedModel'])
@@ -195,17 +195,17 @@ def battlesetup():
 		# First we shall commit dogs.
 		bDog.mean = round(new_DogTS.mu,3)
 		bDog.deviation = round(new_DogTS.sigma,2)
-		bDog.mean_history = bDog.mean_history+str(round(selectedDog.mean,3))+" "
-		bDog.deviation_history = bDog.deviation_history+str(round(selectedDog.deviation,2))+" "
-		bDogHistory = str(labratID)+" "+str(selectedCat.id)+" "+str(round(selectedCat.mean,3))+" "+str(round(selectedCat.deviation,2))+" "+"L"+" "
+		bDog.mean_history = bDog.mean_history+str(round(tDog.mean,3))+" "
+		bDog.deviation_history = bDog.deviation_history+str(round(tDog.deviation,2))+" "
+		bDogHistory = str(labratID)+" "+str(tCat.id)+" "+str(round(tCat.mean,3))+" "+str(round(tCat.deviation,2))+" "+"L"+" "
 		bDog.battle_history = bDog.battle_history+""+bDogHistory
 		# Now we shall commit cats
 		bCat = Cats.query.filter_by(id=tCat.id).first()
 		bCat.mean = round(new_CatTS.mu,3)
 		bCat.deviation = round(new_CatTS.sigma,2)
-		bCat.mean_history = bCat.mean_history+""+str(round(selectedCat.mean,3))+" "
-		bCat.deviation_history = bCat.deviation_history+str(round(selectedCat.deviation,2))+" "
-		bCatHistory = str(labratID)+" "+str(selectedDog.id)+" "+str(selectedDog.mean)+" "+str(round(selectedDog.deviation,2))+" "+"W"+" "
+		bCat.mean_history = bCat.mean_history+""+str(round(tCat.mean,3))+" "
+		bCat.deviation_history = bCat.deviation_history+str(round(tCat.deviation,2))+" "
+		bCatHistory = str(labratID)+" "+str(tDog.id)+" "+str(tDog.mean)+" "+str(round(tDog.deviation,2))+" "+"W"+" "
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
 	db.session.commit()
 	if iterations > 4:
