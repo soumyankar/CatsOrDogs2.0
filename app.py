@@ -314,7 +314,7 @@ def trueskill_dog(id):
 		if i==0:
 			LabRatID.append(x.encode('ascii','ignore'))
 		if i==1:
-			OpponentName.append(str((Cats.query.get_or_404(int((x.encode('ascii','ignore').decode('UTF-8')))).name).decode('UTF-8')))
+			OpponentName.append(str((Cats.query.get_or_404(int((x.encode('ascii','ignore').decode('UTF-8')))).name)))
 		if i==2:
 			OpponentMean.append(float(str(x.encode('ascii','ignore').decode('UTF-8'))))
 		if i==3:
