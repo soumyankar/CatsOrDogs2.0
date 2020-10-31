@@ -23,8 +23,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin'
-selectedDog = "" # Global variable that holds the dog in battleDog
-selectedCat = "" # Global variable that holds the cat in battleCat
+selectedDog = None # Global variable that holds the dog in battleDog
+selectedCat = None # Global variable that holds the cat in battleCat
 battleOrder = [] # Global variable that holds order of battle
 battleWinner = [] # Global variable that holds order of battle winners
 catsMean = [] # Global variable to hold all means of cats
@@ -204,10 +204,10 @@ def battlesetup():
 		bCatHistory = str(labratID)+" "+str(selectedDog.id)+" "+str(selectedDog.mean)+" "+str(round(selectedDog.deviation,2))+" "+"W"+" "
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
 	db.session.commit()
-	if iterations > 3:
+	if iterations > 4:
 		print('battleOrder = ',battleOrder, file=sys.stderr)
 		print('battleWinner = ',battleWinner, file=sys.stderr)
-		hero = bDog.id
+		hero = selectedDog.id
 		new_labrat=LabRats(name=labratName,hero=hero,battle_order=' '.join(map(str,battleOrder)),battle_winner=' '.join(map(str,battleWinner)))
 		db.session.add(new_labrat)
 		db.session.commit()
@@ -215,19 +215,20 @@ def battlesetup():
 		labratID = -99
 		battleOrder = []
 		battleWinner = []
-		return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
-	battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
-	battleCat = FindMatch(battleDog)
-	return jsonify({
-	'catID': battleCat.id,
-	'catName': battleCat.name,
-	'catBreed': battleCat.breed,
-	'catWeblink': battleCat.weblink,
-	'dogID': battleDog.id,
-	'dogName': battleDog.name,
-	'dogBreed': battleDog.breed,
-	'dogWeblink': battleDog.weblink,
-	})
+		return jsonify({'gameover' : 'true', 'endText': 'All 5 tests over'})
+	if iterations <=4:
+		battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
+		battleCat = FindMatch(battleDog)
+		return jsonify({
+		'catID': battleCat.id,
+		'catName': battleCat.name,
+		'catBreed': battleCat.breed,
+		'catWeblink': battleCat.weblink,
+		'dogID': battleDog.id,
+		'dogName': battleDog.name,
+		'dogBreed': battleDog.breed,
+		'dogWeblink': battleDog.weblink,
+		})
 
 @app.route('/commitlabrat', methods=['POST'])
 def commitlabrat():
@@ -315,16 +316,17 @@ def trueskill_dog(id):
 		if i==1:
 			OpponentName.append(str((Cats.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore')))
 		if i==2:
-			OpponentMean.append(str(x.encode('ascii','ignore')))
+			OpponentMean.append(float(str(x.encode('ascii','ignore'))))
 		if i==3:
-			OpponentDeviation.append(str(x.encode('ascii','ignore')))
+			OpponentDeviation.append(float(str(x.encode('ascii','ignore'))))
 		if i==4:
 			Result.append(str(x.encode('ascii','ignore')))
 		i = i + 1
 	length = len(LabRatID)
+	OpponentMean = list(OpponentMean)
+	OpponentDeviation = list(OpponentDeviation)
 	for i in range(0,length):
 		labels.append(i)
-	print(labels)
 	return render_template('trueskill.html',labels=labels, animal = dog, MeanHistory = MeanHistory,DeviationHistory = DeviationHistory,LabRatID = LabRatID, OpponentName = OpponentName, OpponentMean = OpponentMean, OpponentDeviation = OpponentDeviation, Result = Result, length=length)
 
 @app.route('/participants/trueskill-cats/<int:id>')
@@ -350,14 +352,15 @@ def trueskill_cat(id):
 		if i==1:
 			OpponentName.append(str((Dogs.query.get_or_404(int(x.encode('ascii','ignore'))).name).encode('ascii','ignore')))
 		if i==2:
-			OpponentMean.append(str(x.encode('ascii','ignore')))
+			OpponentMean.append(float((x.encode('ascii','ignore'))))
 		if i==3:
-			OpponentDeviation.append(str(x.encode('ascii','ignore')))
+			OpponentDeviation.append(float(str(x.encode('ascii','ignore'))))
 		if i==4:
 			Result.append(str(x.encode('ascii','ignore')))
 		i = i + 1
 	length = len(LabRatID)
+	OpponentMean = list(OpponentMean)
+	OpponentDeviation = list(OpponentDeviation)
 	for i in range(0,length):
 		labels.append(i)
-	print(labels)
 	return render_template('trueskill.html',animal = cat, labels = labels, MeanHistory = MeanHistory,DeviationHistory = DeviationHistory,LabRatID = LabRatID, OpponentName = OpponentName, OpponentMean = OpponentMean, OpponentDeviation = OpponentDeviation, Result = Result, length=length)

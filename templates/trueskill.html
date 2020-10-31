@@ -65,7 +65,7 @@ window.chartColors = {
     thistle: 'rgb(216,191,216)',
     slate_grap: 'rgb(112,128,144)'
 };
-
+{% set i = [ ] %}
 // Some Chart Colors --End
 var i=0;
 var colorNames = Object.keys(window.chartColors);
@@ -105,17 +105,19 @@ var config = {
             intersect: false,
             callbacks: {
                     label: function(tooltipItems, data) {
+											var oppMean = {{ OpponentMean }};
+											var oppDeviation = {{ OpponentDeviation }};
                     	var symbol = 'µ';
                     	var label;
                     	if(i % 2 == 0)
                     	{
                     		symbol='σ';
-                        	label = symbol+' = '+tooltipItems.yLabel+' Enemy σ = 8.3';
+                        	label = symbol+' = '+tooltipItems.yLabel+' Enemy σ = '+oppDeviation[tooltipItems.index];
                         }
                         if(i%2 !=0)
                         {
                         	symbol='µ';
-                    	    label = symbol+' = '+tooltipItems.yLabel+' Enemy µ = 24';
+                    	    label = symbol+' = '+tooltipItems.yLabel+' Enemy µ = '+ oppMean[tooltipItems.index];
                         }
                         i+=1;
                         return label;
@@ -170,7 +172,7 @@ var colorNames = Object.keys(window.chartColors);
 		{% else %}
 		{% for x in range(length) %}
     <tr>
-      <th scope="row">{{x+1}}</th>
+      <th scope="row">{{x}}</th>
       <td>µ = {{  MeanHistory[x] }} ; σ = {{ DeviationHistory[x] }}</td>
       <td>µ = {{ OpponentMean[x] }} ; σ =  {{ OpponentDeviation[x] }}
       	<br>{{ OpponentName[x] }}
