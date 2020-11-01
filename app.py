@@ -143,7 +143,7 @@ def FindMatch(battleDog):
 			bestCat = cat # Best Match yet (this is dataclip)
 	battleOrder.append(bestCat.id)
 	# Pepega
-	os.environ['battleOrder']= os.environ['battleOrder']+' '+str(bestCat.id)
+	os.environ['battleOrder']= os.environ.get('battleOrder')+' '+str(bestCat.id)
 	# print('battleOrder =',battleOrder,file=sys.stderr)
 	print('Battle Dog Mean =',battleDogTrueSkill.mu,'Battle Dog Sigma =',battleDogTrueSkill.sigma,file=sys.stderr)
 	print('Best Cat =',bestCat.id,',',bestCat.mean,file=sys.stderr)
@@ -156,7 +156,7 @@ def battlesetup():
 	if request.form['animalType'] == "dog":
 		battleWinner.append(int(1))
 		bW = 1
-		os.environ['battleWinner']=os.environ['battleWinner']+' '+str(bW)
+		os.environ['battleWinner']=os.environ.get('battleWinner')+' '+str(bW)
 		xy = os.environ.get('battleOrder').split()
 		print('xy',xy)
 		tCat = Rating(mu = (Cats.query.get_or_404(int(xy[-1]))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
