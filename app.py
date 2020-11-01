@@ -142,7 +142,10 @@ def FindMatch(battleDog):
 			bestRating = abs(tempQuality - 50)
 			bestCat = cat # Best Match yet (this is dataclip)
 	battleOrder.append(bestCat.id)
+	# Pepega
+	os.environ['battleOrder']= os.environ['battleOrder']+' '+str(bestCat.id)
 	# print('battleOrder =',battleOrder,file=sys.stderr)
+	print('Battle Dog Mean =',battleDogTrueSkill.mu,'Battle Dog Sigma =',battleDogTrueSkill.sigma,file=sys.stderr)
 	print('Best Cat =',bestCat.id,',',bestCat.mean,file=sys.stderr)
 	iterations = iterations + 1
 	return bestCat
@@ -150,23 +153,26 @@ def FindMatch(battleDog):
 @app.route('/battlesetup',methods=['POST'])
 def battlesetup():
 	global selectedDog,iterations,battleWinner, battleOrder, selectedDogTS
-	print(battleOrder)
-	print(iterations)
 	if request.form['animalType'] == "dog":
 		battleWinner.append(int(1))
-		tCat = Rating(mu = (Cats.query.get_or_404(battleOrder[-1])).mean, sigma = (Cats.query.get_or_404(battleOrder[-1])).deviation)
+		bW = 1
+		os.environ['battleWinner']=os.environ['battleWinner']+' '+str(bW)
+		xy = os.environ.get('battleOrder').split()
+		print('xy',xy)
+		tCat = Rating(mu = (Cats.query.get_or_404(int(xy[-1]))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
 		selectedDogTS,x = rate_1vs1(selectedDogTS, tCat)
-		print(selectedDogTS)
 	if request.form['animalType'] == "cat":
 		battleWinner.append(int(0))
-		tCat = Rating(mu = (Cats.query.get_or_404(battleOrder[-1])).mean, sigma = (Cats.query.get_or_404(battleOrder[-1])).deviation)
+		bW = 0
+		xy = os.environ.get('battleOrder').split()
+		print('xy',xy)
+		os.environ['battleWinner']=os.environ['battleWinner']+' '+str(bW)
+		tCat = Rating(mu = (Cats.query.get_or_404((int(xy[-1])))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
 		x,selectedDogTS = rate_1vs1(tCat, selectedDogTS)
-		print(selectedDogTS)
+	# Pepega
 	if iterations > 4:
-		print('battleOrder = ',battleOrder, file=sys.stderr)
-		print('battleWinner = ',battleWinner, file=sys.stderr)
 		battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
-		commitdata(battleDog,battleOrder,battleWinner)
+		commitdata(battleDog)
 		iterations = 0
 		battleOrder = []
 		battleWinner = []
@@ -201,8 +207,12 @@ def commitlabrat():
 		labratName = request.form['name']
 	return jsonify({'labrat': labratName})
 
-def commitdata(sDog, bOrder, bWinner):
+def commitdata(sDog):
 	global labratID
+	bOrder = list(map(int,os.environ.get('battleOrder').split()))
+	bWinner = list(map(int,os.environ.get('battleWinner').split()))
+	print('bOrder', bOrder)
+	print('bWinner', bWinner)
 	# Commiting LabRat Info
 	hero = sDog.id
 	new_labrat=LabRats(name=labratName,hero=hero,battle_order=' '.join(map(str,bOrder)),battle_winner=' '.join(map(str,bWinner)))
