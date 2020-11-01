@@ -157,14 +157,14 @@ def battlesetup():
 		battleWinner.append(int(1))
 		bW = 1
 		os.environ['battleWinner']=str(os.environ.get('battleWinner'))+' '+str(bW)
-		xy = os.environ.get('battleOrder').split()
+		xy = str(os.environ.get('battleOrder')).split()
 		print('xy',xy)
 		tCat = Rating(mu = (Cats.query.get_or_404(int(xy[-1]))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
 		selectedDogTS,x = rate_1vs1(selectedDogTS, tCat)
 	if request.form['animalType'] == "cat":
 		battleWinner.append(int(0))
 		bW = 0
-		xy = os.environ.get('battleOrder').split()
+		xy = str(os.environ.get('battleOrder')).split()
 		print('xy',xy)
 		os.environ['battleWinner']=str(os.environ.get('battleWinner'))+' '+str(bW)
 		tCat = Rating(mu = (Cats.query.get_or_404((int(xy[-1])))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
