@@ -28,6 +28,7 @@ $(document).ready(function() {
                   dogWeblink = data.dogWeblink;
           				$('#step2').fadeOut();
                   $('#step3').fadeIn();
+                  $('#infoAlert').fadeIn();
                   $('#dog').val(dogID);
                   $('#cat').val(catID);
                   $('#dog-name').html(dogName).show();
@@ -44,8 +45,6 @@ $(document).ready(function() {
     });
   $('#dog').click(function(){
     // This is when the dog is chosen over the cat.
-    console.log($('#dog').val());
-    console.log($('#cat').val());
     $('#successAlert').text("You liked "+$('#dog-name').html()+" over "+$('#cat-name').html()).show();
     $('#errorAlert').hide();
     $('#cat-picture').fadeOut();
@@ -60,6 +59,7 @@ $(document).ready(function() {
 		}).done(function(data) {
       if(data.gameover){
         $('#errorAlert').text(data.endText).show();
+        $('#infoAlert').hide();
 				$('#successAlert').hide();
         $('#step3').fadeOut();
         $('#instructions').fadeOut();
@@ -80,8 +80,6 @@ $(document).ready(function() {
         dogBreed = data.dogBreed;
         dogWeblink = data.dogWeblink;
         $('#cat').val(catID);
-        console.log('Receive from sv: '+$('#dog').val());
-        console.log('Receive from sv: '+$('#cat').val());1
         $('#cat-name').html(catName).show();
         $('#cat-breed').html(catBreed).show();
         $('#cat-picture').attr('src',catWeblink).fadeIn();
@@ -92,8 +90,6 @@ $(document).ready(function() {
 
   $('#cat').click(function(){
     // This function is for when cat is selected
-    console.log($('#dog').val());
-    console.log($('#cat').val());
     $('#successAlert').text("You liked "+$('#cat-name').html()+" over "+$('#dog-name').html()).show();
     $('#errorAlert').hide();
     $('#cat-picture').fadeOut();
@@ -108,6 +104,7 @@ $(document).ready(function() {
 		}).done(function(data) {
       if(data.gameover){
         $('#errorAlert').text(data.endText).show();
+        $('#infoAlert').hide();
         $('#successAlert').fadeOut();
         $('#step3').fadeOut();
         $('#instructions').fadeOut();
@@ -128,8 +125,6 @@ $(document).ready(function() {
         dogBreed = data.dogBreed;
         dogWeblink = data.dogWeblink;
         $('#cat').val(catID);
-        console.log('Receive from sv: '+$('#dog').val());
-        console.log('Receive from sv: '+$('#cat').val());
         $('#cat-name').html(catName).show();
         $('#cat-breed').html(catBreed).show();
         $('#cat-picture').attr('src',catWeblink).fadeIn();

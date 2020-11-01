@@ -10,11 +10,16 @@
     </a>
 </li>
 {% endblock %}
+{% block nav%}
+<li>
+    <a href="/admin/labrats">LabRats</a>
+</li>
+{% endblock %}
 {% block container %}
 <h1>Participants</h1>
 <p>Ability to add animals here!</p>
 <br><br>
-<form name="inputform" method="POST" action="/participants" onsubmit="return (validate())">
+<form name="inputform" method="POST" action="/admin/participants" onsubmit="return (validate())">
 	<label>Name </label>
 	<br>
 	<input type="text" name="name">
@@ -51,7 +56,7 @@
 {% for dog in dogs %}
 <div class="row">
 	<div class="col-sm-4">
-		<a href="/participants/trueskill-dogs/{{ dog.id }}"><img id="player-picture" src="{{ dog.weblink }}" style="max-width: 250px; max-height: 250px"></a>
+		<a href="/admin/participants/trueskill-dogs/{{ dog.id }}"><img id="player-picture" src="{{ dog.weblink }}" style="max-width: 250px; max-height: 250px"></a>
 	</div>
 	<div class="col-sm-8">
 		<p id="dog-id"><b>ID </b>- {{ dog.id }}</p>
@@ -60,8 +65,8 @@
 		<p id="dog-mean"><b>TrueSkill µ </b>- {{ dog.mean }}</p>
 		<p id="dog-deviation"><b>TrueSkill σ </b>- {{ dog.deviation }}</p>
 		<p id="dog-date-created"><b>Date Created </b>- {{ dog.date_created.date() }}</p>
-		<button value="Delete!"><a href="/participants/delete-dogs/{{ dog.id }}">Delete</a></button>
-		<button value="TrueSkill Info"><a href="/participants/trueskill-dogs/{{ dog.id }}">TrueSkill Info</a></button>
+		<button value="Delete!"><a href="/admin/participants/delete-dogs/{{ dog.id }}">Delete</a></button>
+		<button value="TrueSkill Info"><a href="/admin/participants/trueskill-dogs/{{ dog.id }}">TrueSkill Info</a></button>
 	</div>
 </div>
 <br>
@@ -77,7 +82,7 @@
 {% for cat in cats %}
 <div class="row">
 	<div class="col-sm-4">
-		<a href="/participants/trueskill-cats/{{ cat.id }}"><img id="player-picture" src="{{ cat.weblink }}" style="max-width: 250px; max-height: 250px"></a>
+		<a href="/admin/participants/trueskill-cats/{{ cat.id }}"><img id="player-picture" src="{{ cat.weblink }}" style="max-width: 250px; max-height: 250px"></a>
 	</div>
 	<div class="col-sm-8">
 		<p id="cat-id"><b>ID </b>- {{ cat.id }}</p>
@@ -86,8 +91,8 @@
 		<p id="cat-mean"><b>TrueSkill µ </b>- {{ cat.mean }}</p>
 		<p id="cat-deviation"><b>TrueSkill σ </b>- {{ cat.deviation }}</p>
 		<p id="cat-date-created"><b>Date Created </b>- {{ cat.date_created.date() }}</p>
-		<button value="Delete!"><a href="/participants/delete-cats/{{ cat.id }}">Delete</a></button>
-		<button value="TrueSkill Info"><a href="/participants/trueskill-cats/{{ cat.id }}">TrueSkill Info</a></button>
+		<button value="Delete!"><a href="/admin/participants/delete-cats/{{ cat.id }}">Delete</a></button>
+		<button value="TrueSkill Info"><a href="/admin/participants/trueskill-cats/{{ cat.id }}">TrueSkill Info</a></button>
 	</div>
 </div>
 <br>

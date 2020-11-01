@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+{% block logout %}
+<li>
+	<a href="/logout">
+          <span class="glyphicon glyphicon-log-out"></span> <span style="color: red;">Logout</span>
+    </a>
+</li>
+{% endblock %}
+{% block nav%}
+<li>
+    <a href="/admin/labrats">LabRats</a>
+</li>
+{% endblock %}
+{% block container %}
+<h1>LabRats</h1>
+<p>Just going to display the labrats here, and how they have been responding to the project.</p>
+{% if labrats|length < 1 %}
+<p>No labrats in database :(</p>
+{% else %}
+<br>
+{% for labrat in labrats %}
+<div class="row">
+	<div class="col-sm-4">
+		<img id="labrat-picture" src="{{ url_for('static',filename='img/dp.jpeg') }}" style="max-width: 250px; max-height: 250px; border-radius:50%;">
+	</div>
+	<div class="col-sm-8">
+		<p id="labrat-id"><b>ID </b>- {{ labrat.id }}</p>
+		<p id="labrat-name"><b>Name </b>- {{ labrat.name }}</p>
+		<p id="labrat-hero"><b>Hero </b>- {{ labrat.hero }}</p>
+		<p id="labrat-battle-order"><b>Order of Cats </b>- {{ labrat.battle_order }}</p>
+		<p id="labrat-battle-winner"><b>Battle winners </b>- {{ labrat.battle_winner }}</p>
+		<p id="dog-date-created"><b>Date Created </b>- {{ labrat.date_created.date() }}</p>
+	</div>
+</div>
+<br>
+<br>
+{% endfor %}
+{% endif %}
+{% endblock%}
