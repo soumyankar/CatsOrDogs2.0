@@ -23,14 +23,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin'
-Hero = None # Hero Dog
-selectedDog = None # Global variable that holds the dog in battleDog
-selectedCat = None # Global variable that holds the cat in battleCat
-battleOrder = [] # Global variable that holds order of battle
-battleWinner = [] # Global variable that holds order of battle winners
-iterations = 0 # Global variable that keeps count of 10 iterations.
-labratID = -99 # Global variable that holds the ID of the next user to be added
-labratName = "My mentors dont help me sadkek" # Global variable that holds labrat's name
+
 
 class Admin(UserMixin, db.Model):
 	id=db.Column(db.Integer, primary_key=True)
@@ -124,10 +117,14 @@ def battle():
 	dogs=Dogs.query.all()
 	return render_template('battle.html',dogs=dogs)
 
-def FindMatch(battleDog):
-	global battleOrder, iterations, selectedDog, selectedDogTS
+def FindMatch(labratID, battleDog):
 	cats = Cats.query.all()
 	battleDogTrueSkill = battleDog
+	x = (LabRats.query.get_or_404(labratID)).battle_order
+	x = x.encode('ascii','ignore')
+	battleOrder = x.split()
+	battleOrder =list(map(int,battleOrder))
+	print("battleOrder",battleOrder)
 	# lowerLimit = battleDogMean - 2*battleDogDeviation
 	# upperLimit = battleDogMean + 2*battleDogDeviation
 	bestRating = 99999
@@ -141,52 +138,39 @@ def FindMatch(battleDog):
 		if (abs(tempQuality - 50) < bestRating): # Finding closest matchup, i.e 50% draw prob. and checking if (i) has been selected already
 			bestRating = abs(tempQuality - 50)
 			bestCat = cat # Best Match yet (this is dataclip)
-	battleOrder.append(bestCat.id)
 	# Pepega
-	os.environ['battleOrder']= str(os.environ.get('battleOrder')) +' '+str(bestCat.id)
-	# print('battleOrder =',battleOrder,file=sys.stderr)
 	print('Battle Dog Mean =',battleDogTrueSkill.mu,'Battle Dog Sigma =',battleDogTrueSkill.sigma,file=sys.stderr)
 	print('Best Cat =',bestCat.id,',',bestCat.mean,file=sys.stderr)
-	iterations = iterations + 1
 	return bestCat
 
 @app.route('/battlesetup',methods=['POST'])
 def battlesetup():
-	global selectedDog,iterations,battleWinner, battleOrder, selectedDogTS
+	battleWinner = -99
 	if request.form['animalType'] == "dog":
-		battleWinner.append(int(1))
-		bW = 1
-		os.environ['battleWinner']=str(os.environ.get('battleWinner'))+' '+str(bW)
-		xy = str(os.environ.get('battleOrder')).split()
-		print('xy',xy)
-		tCat = Rating(mu = (Cats.query.get_or_404(int(xy[-1]))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
-		selectedDogTS,x = rate_1vs1(selectedDogTS, tCat)
+		battleWinner = 1
+		lID = LabRats.query.count() # ID of last labrat inserted
+		bCat = Cats.query.get_or_404(request.form['opponentCat'])
+		bDog = Dogs.query.get_or_404(request.form['selectedModel'])
+		commitdata(lID ,bDog, bCat, battleWinner)
 	if request.form['animalType'] == "cat":
-		battleWinner.append(int(0))
-		bW = 0
-		xy = str(os.environ.get('battleOrder')).split()
-		print('xy',xy)
-		os.environ['battleWinner']=str(os.environ.get('battleWinner'))+' '+str(bW)
-		tCat = Rating(mu = (Cats.query.get_or_404((int(xy[-1])))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
-		x,selectedDogTS = rate_1vs1(tCat, selectedDogTS)
+		battleWinner = 0
+		lID = LabRats.query.count() # ID of last labrat inserted
+		bCat = Cats.query.get_or_404(request.form['opponentCat'])
+		bDog = Dogs.query.get_or_404(request.form['selectedModel'])
+		commitdata(lID ,bDog, bCat, battleWinner)
 	# Pepega
+	iterations = LabRats.query.count()
+	iterations = LabRats.query.get_or_404(iterations)
+	iterations = str(iterations.battle_order)
+	iterations = len(iterations.split())
+	print('iterations',iterations)
 	if iterations > 4:
-		battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
-		commitdata(battleDog)
-		iterations = 0
-		battleOrder = []
-		battleWinner = []
 		return jsonify({'gameover' : 'true', 'endText': 'All 5 tests over'})
 	if iterations <=4:
 		battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
-		if iterations == 0: # First iteration only
-			selectedDog = Rating(mu = battleDog.mean, sigma = battleDog.deviation)
-			selectedDogTS = selectedDog
-			sDogTS = selectedDog
-			Hero = battleDog
-		if iterations > 0:
-			sDogTS = selectedDogTS
-		battleCat = FindMatch(sDogTS) # Always pass TrueSkill variable
+		sDogTS = Rating(mu = battleDog.mean, sigma = battleDog.deviation)
+		labratID = LabRats.query.count()
+		battleCat = FindMatch(labratID, sDogTS) # Always pass TrueSkill variable
 		return jsonify({
 		'catID': battleCat.id,
 		'catName': battleCat.name,
@@ -200,60 +184,56 @@ def battlesetup():
 
 @app.route('/commitlabrat', methods=['POST'])
 def commitlabrat():
-	global labratID,labratName
 	labratID = LabRats.query.count()
-	labratID = labratID + 1
 	if request.form['name']:
 		labratName = request.form['name']
+		new_labrat = LabRats(name=labratName,battle_order="",battle_winner="")
+		db.session.add(new_labrat)
+		db.session.commit()
 	return jsonify({'labrat': labratName})
 
-def commitdata(sDog):
-	global labratID
-	bOrder = list(map(int,os.environ.get('battleOrder').split()))
-	bWinner = list(map(int,os.environ.get('battleWinner').split()))
-	print('bOrder', bOrder)
-	print('bWinner', bWinner)
+def commitdata(labratID, sDog, sCat, bWinner): # LabratID, battledog dataclip, battleCat dataclip
 	# Commiting LabRat Info
-	hero = sDog.id
-	new_labrat=LabRats(name=labratName,hero=hero,battle_order=' '.join(map(str,bOrder)),battle_winner=' '.join(map(str,bWinner)))
-	db.session.add(new_labrat)
+	bWinner = str(bWinner)
+	labrat = LabRats.query.get_or_404(labratID)
+	labrat.hero = sDog.id
+	labrat.battle_order = labrat.battle_order+""+(str(sCat.id))+" "
+	labrat.battle_winner = labrat.battle_winner+bWinner+" "
 	db.session.commit()
 	# Commit The Battles
 	DogTS = Rating(mu = sDog.mean, sigma = sDog.deviation)
-	length = len(bOrder)
-	for i in range(0,length):
-		tCat = Cats.query.get_or_404(bOrder[i])
-		CatTS = Rating(mu = tCat.mean, sigma = tCat.deviation)
-		# Finding W/L status
-		if bWinner[i] == 1:
-			new_DogTS, new_CatTS = rate_1vs1(DogTS,CatTS)
-			dogResult = "W"
-			catResult = "L"
-		if bWinner[i] == 0:
-			new_DogTS, new_CatTS = rate_1vs1(CatTS,DogTS)
-			dogResult = "L"
-			catResult = "W"
-		# Commiting all this data.
-		bDog = Dogs.query.filter_by(id=sDog.id).first()
-		# First we shall commit dogs.
-		bDog.mean_history = bDog.mean_history+str(round(bDog.mean,3))+" "
-		bDog.deviation_history = bDog.deviation_history+str(round(bDog.deviation,2))+" "
-		bDog.mean = round(new_DogTS.mu,3)
-		bDog.deviation = round(new_DogTS.sigma,2)
-		bDogHistory = str(labratID)+" "+str(bOrder[i])+" "+str(round(tCat.mean,3))+" "+str(round(tCat.deviation,2))+" "+dogResult+" "
-		bDog.battle_history = bDog.battle_history+""+bDogHistory
-		print('bDogHistory',bDogHistory)
-		# Now we shall commit cats
-		bCat = Cats.query.filter_by(id=bOrder[i]).first()
-		bCat.mean_history = bCat.mean_history+""+str(round(tCat.mean,3))+" "
-		bCat.deviation_history = bCat.deviation_history+str(round(tCat.deviation,2))+" "
-		bCat.mean = round(new_CatTS.mu,3)
-		bCat.deviation = round(new_CatTS.sigma,2)
-		bCatHistory = str(labratID)+" "+str(bDog.id)+" "+str(round(DogTS.mu,3))+" "+str(round(DogTS.sigma,2))+" "+catResult+" "
-		bCat.battle_history = bCat.battle_history+""+bCatHistory
-		print('bCatHistory',bCatHistory)
-		db.session.commit()
-		DogTS = new_DogTS
+	tCat = Cats.query.get_or_404(sCat.id)
+	CatTS = Rating(mu = tCat.mean, sigma = tCat.deviation)
+	# Finding W/L status
+	if bWinner == "1":
+		new_DogTS, new_CatTS = rate_1vs1(DogTS,CatTS)
+		dogResult = "W"
+		catResult = "L"
+	if bWinner == "0":
+		new_DogTS, new_CatTS = rate_1vs1(CatTS,DogTS)
+		dogResult = "L"
+		catResult = "W"
+	# Commiting all this data.
+	bDog = Dogs.query.filter_by(id=sDog.id).first()
+	# First we shall commit dogs.
+	bDog.mean_history = bDog.mean_history+str(round(bDog.mean,3))+" "
+	bDog.deviation_history = bDog.deviation_history+str(round(bDog.deviation,2))+" "
+	bDog.mean = round(new_DogTS.mu,3)
+	bDog.deviation = round(new_DogTS.sigma,2)
+	bDogHistory = str(labratID)+" "+str(sCat.id)+" "+str(round(tCat.mean,3))+" "+str(round(tCat.deviation,2))+" "+dogResult+" "
+	bDog.battle_history = bDog.battle_history+""+bDogHistory
+	print('bDogHistory',bDogHistory)
+	# Now we shall commit cats
+	bCat = Cats.query.filter_by(id=sCat.id).first()
+	bCat.mean_history = bCat.mean_history+""+str(round(tCat.mean,3))+" "
+	bCat.deviation_history = bCat.deviation_history+str(round(tCat.deviation,2))+" "
+	bCat.mean = round(new_CatTS.mu,3)
+	bCat.deviation = round(new_CatTS.sigma,2)
+	bCatHistory = str(labratID)+" "+str(bDog.id)+" "+str(round(DogTS.mu,3))+" "+str(round(DogTS.sigma,2))+" "+catResult+" "
+	bCat.battle_history = bCat.battle_history+""+bCatHistory
+	print('bCatHistory',bCatHistory)
+	db.session.commit()
+	DogTS = new_DogTS
 
 @app.route('/admin/labrats',methods=['GET'])
 @login_required
