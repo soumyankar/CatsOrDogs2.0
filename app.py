@@ -142,7 +142,7 @@ def FindMatch(battleDog):
 			bestRating = abs(tempQuality - 50)
 			bestCat = cat # Best Match yet (this is dataclip)
 	battleOrder.append(bestCat.id)
-	print('battleOrder =',battleOrder,file=sys.stderr)
+	# print('battleOrder =',battleOrder,file=sys.stderr)
 	print('Best Cat =',bestCat.id,',',bestCat.mean,file=sys.stderr)
 	iterations = iterations + 1
 	return bestCat
@@ -150,6 +150,7 @@ def FindMatch(battleDog):
 @app.route('/battlesetup',methods=['POST'])
 def battlesetup():
 	global selectedDog,iterations,battleWinner, battleOrder, selectedDogTS
+	print(battleOrder)
 	if request.form['animalType'] == "dog":
 		battleWinner.append(int(1))
 		tCat = Rating(mu = (Cats.query.get_or_404(battleOrder[-1])).mean, sigma = (Cats.query.get_or_404(battleOrder[-1])).deviation)
@@ -230,7 +231,7 @@ def commitdata(sDog, bOrder, bWinner):
 		bDog.deviation = round(new_DogTS.sigma,2)
 		bDogHistory = str(labratID)+" "+str(bOrder[i])+" "+str(round(tCat.mean,3))+" "+str(round(tCat.deviation,2))+" "+dogResult+" "
 		bDog.battle_history = bDog.battle_history+""+bDogHistory
-		# print(bDogHistory)
+		print('bDogHistory',bDogHistory)
 		# Now we shall commit cats
 		bCat = Cats.query.filter_by(id=bOrder[i]).first()
 		bCat.mean_history = bCat.mean_history+""+str(round(tCat.mean,3))+" "
@@ -239,6 +240,7 @@ def commitdata(sDog, bOrder, bWinner):
 		bCat.deviation = round(new_CatTS.sigma,2)
 		bCatHistory = str(labratID)+" "+str(bDog.id)+" "+str(round(DogTS.mu,3))+" "+str(round(DogTS.sigma,2))+" "+catResult+" "
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
+		print('bCatHistory',bCatHistory)
 		db.session.commit()
 		DogTS = new_DogTS
 
