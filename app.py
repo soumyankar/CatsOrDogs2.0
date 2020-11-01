@@ -152,12 +152,12 @@ def battlesetup():
 	global selectedDog,iterations,battleWinner, battleOrder, selectedDogTS
 	if request.form['animalType'] == "dog":
 		battleWinner.append(int(1))
-		tCat = Rating(mu = Cats.query.get_or_404(battleOrder[-1]).mean, sigma = Cats.query.get_or_404(battleOrder[-1]).deviation)
+		tCat = Rating(mu = (Cats.query.get_or_404(battleOrder[-1])).mean, sigma = (Cats.query.get_or_404(battleOrder[-1])).deviation)
 		selectedDogTS,x = rate_1vs1(selectedDogTS, tCat)
 		print(selectedDogTS)
 	if request.form['animalType'] == "cat":
 		battleWinner.append(int(0))
-		tCat = Rating(mu = Cats.query.get_or_404(battleOrder[-1]).mean, sigma = Cats.query.get_or_404(battleOrder[-1]).deviation)
+		tCat = Rating(mu = (Cats.query.get_or_404(battleOrder[-1])).mean, sigma = (Cats.query.get_or_404(battleOrder[-1])).deviation)
 		x,selectedDogTS = rate_1vs1(tCat, selectedDogTS)
 		print(selectedDogTS)
 	if iterations > 4:
@@ -165,10 +165,6 @@ def battlesetup():
 		print('battleWinner = ',battleWinner, file=sys.stderr)
 		battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
 		commitdata(battleDog,battleOrder,battleWinner)
-		# hero = selectedDog.id
-		# new_labrat=LabRats(name=labratName,hero=hero,battle_order=' '.join(map(str,battleOrder)),battle_winner=' '.join(map(str,battleWinner)))
-		# db.session.add(new_labrat)
-		# db.session.commit()
 		iterations = 0
 		battleOrder = []
 		battleWinner = []
@@ -226,7 +222,6 @@ def commitdata(sDog, bOrder, bWinner):
 			dogResult = "L"
 			catResult = "W"
 		# Commiting all this data.
-		print(new_DogTS)
 		bDog = Dogs.query.filter_by(id=sDog.id).first()
 		# First we shall commit dogs.
 		bDog.mean_history = bDog.mean_history+str(round(bDog.mean,3))+" "
@@ -242,10 +237,9 @@ def commitdata(sDog, bOrder, bWinner):
 		bCat.deviation_history = bCat.deviation_history+str(round(tCat.deviation,2))+" "
 		bCat.mean = round(new_CatTS.mu,3)
 		bCat.deviation = round(new_CatTS.sigma,2)
-		bCatHistory = str(labratID)+" "+str(bOrder[i])+" "+str(round(DogTS.mu,3))+" "+str(round(DogTS.sigma,2))+" "+catResult+" "
+		bCatHistory = str(labratID)+" "+str(bDog.id)+" "+str(round(DogTS.mu,3))+" "+str(round(DogTS.sigma,2))+" "+catResult+" "
 		bCat.battle_history = bCat.battle_history+""+bCatHistory
 		db.session.commit()
-		print(bCatHistory)
 		DogTS = new_DogTS
 
 @app.route('/admin/labrats',methods=['GET'])
