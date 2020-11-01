@@ -151,6 +151,7 @@ def FindMatch(battleDog):
 def battlesetup():
 	global selectedDog,iterations,battleWinner, battleOrder, selectedDogTS
 	print(battleOrder)
+	print(iterations)
 	if request.form['animalType'] == "dog":
 		battleWinner.append(int(1))
 		tCat = Rating(mu = (Cats.query.get_or_404(battleOrder[-1])).mean, sigma = (Cats.query.get_or_404(battleOrder[-1])).deviation)
