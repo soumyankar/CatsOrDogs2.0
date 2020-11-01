@@ -166,7 +166,7 @@ def battlesetup():
 		bW = 0
 		xy = os.environ.get('battleOrder').split()
 		print('xy',xy)
-		os.environ['battleWinner']=os.environ['battleWinner']+' '+str(bW)
+		os.environ['battleWinner']=str(os.environ['battleWinner'])+' '+str(bW)
 		tCat = Rating(mu = (Cats.query.get_or_404((int(xy[-1])))).mean, sigma = (Cats.query.get_or_404((int(xy[-1])))).deviation)
 		x,selectedDogTS = rate_1vs1(tCat, selectedDogTS)
 	# Pepega
