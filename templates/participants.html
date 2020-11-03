@@ -49,6 +49,8 @@
 <div class="line"></div>
 <h2>Dogs</h2>
 <br>
+<div id="infoAlertDogs" class="row alert alert-info text-info" role="info">Currently displaying {{ dogs_count }} dogs.</div>
+<br>
 {% if dogs|length < 1 %}
 <p>No dogs in database :(</p>
 {% else %}
@@ -75,6 +77,8 @@
 {% endif %}
 <div class="line"></div>
 <h2>Cats</h2>
+<br>
+<div id="infoAlertCats" class="row alert alert-info text-info" role="info">Currently displaying {{ cats_count }} cats.</div>
 <br>
 {% if cats|length < 1 %}
 <p>No cats in database :(</p>

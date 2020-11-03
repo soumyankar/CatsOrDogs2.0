@@ -164,9 +164,9 @@ def battlesetup():
 	iterations = str(iterations.battle_order)
 	iterations = len(iterations.split())
 	print('iterations',iterations)
-	if iterations > 4:
-		return jsonify({'gameover' : 'true', 'endText': 'All 5 tests over'})
-	if iterations <=4:
+	if iterations > 9:
+		return jsonify({'gameover' : 'true', 'endText': 'All 10 tests over'})
+	if iterations <=9:
 		battleDog = Dogs.query.get_or_404(request.form['selectedModel'])
 		sDogTS = Rating(mu = battleDog.mean, sigma = battleDog.deviation)
 		labratID = LabRats.query.count()
@@ -270,9 +270,11 @@ def participants():
 			except:
 				return 'There was some error uploading cats.'
 
-	dogs = Dogs.query.all()
-	cats = Cats.query.all()
-	return render_template('participants.html',dogs=dogs, cats=cats)
+	dogs = Dogs.query.order_by(Dogs.id.asc()).all()
+	dogs_count = Dogs.query.count()
+	cats = Cats.query.order_by(Cats.id.asc()).all()
+	cats_count = Cats.query.count()
+	return render_template('participants.html',dogs=dogs, cats=cats,dogs_count=dogs_count,cats_count=cats_count)
 
 @app.route('/admin/participants/delete-dogs/<int:id>')
 @login_required
